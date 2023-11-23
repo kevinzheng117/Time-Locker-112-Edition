@@ -1,4 +1,5 @@
 from cmu_graphics import *
+import random
 
 class Player: 
     def __init__(self, size):
@@ -11,9 +12,10 @@ class Enemy:
         self.speed = speed
 
 class Projectile:
-    def __init__(self, size, speed):
+    def __init__(self, size, speed, duration):
         self.size = size
         self.speed = speed
+        self.duration = duration
     
 def newGame(app):
     app.width = 400
@@ -25,8 +27,8 @@ def newGame(app):
     app.gameOver = False
     app.enemy1 = Enemy(1, 15, 1)
     app.player = Player(25)
-    app.bullet = Projectile(7.5, 1)
-    app.enemyList = [[200, 100]]
+    app.bullet = Projectile(7.5, 1, 4)
+    app.enemyList = []
     app.projectileList = []
     app.spawnCounter = 0
     app.forwardCounter = 0
@@ -44,17 +46,25 @@ def checkCollison(app):
                   distance(app.playerX, app.playerY, enemy[0], enemy[1]) <= app.player.size + app.enemy1.size):
                 app.gameOver = True
 
+def addEnemies(app):
+    pass
+
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True:
         if app.stepsPerSecond != 5:
+            app.spawnCounter += 1
+
+            # adds enemies
+            if app.spawnCounter % 5 == 0:
+                addEnemies(app)
+
             # moves enemies
             for enemy in app.enemyList:
                 enemy[0] += 10
 
             # adds player projectiles
-            app.spawnCounter += 1
-            if app.spawnCounter % 4 == 0:
+            if app.spawnCounter % app.bullet.duration == 0:
                 app.projectileList.append([app.playerX, app.playerY - app.player.size])
             
             # moves player projectiles
@@ -78,7 +88,6 @@ def onKeyPress(app, key):
         if key != None:
             app.startMenu = False
     
-
 def onKeyRelease(app, key):
     if key in {'right', 'left', 'up', 'down'}:
         app.stepsPerSecond = 5
