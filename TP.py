@@ -50,22 +50,28 @@ def onAppStart(app):
     newGame(app)
 
 def checkCollison(app):
-    for enemy in app.enemyDict.copy():
+    enemyDict = app.enemyDict.copy()
+    for enemy in enemyDict:
         for projectile in app.projectileList:
-            if (distance(app.enemyDict[enemy][0], app.enemyDict[enemy][1], projectile[0], projectile[1]) 
+            if (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectile[0], projectile[1]) 
                 <= enemy.size + app.bullet.size):
                 app.enemyDict.pop(enemy)
                 app.projectileList.remove(projectile)
             elif ((distance(app.playerX, app.playerY, projectile[0], projectile[1]) 
                    <= app.player.size+ app.bullet.size) or
-                  (distance(app.playerX, app.playerY, app.enemyDict[enemy][0], app.enemyDict[enemy][1])
+                  (distance(app.playerX, app.playerY, enemyDict[enemy][0], enemyDict[enemy][1])
                    <= app.player.size + enemy.size)):
                 app.gameOver = True
 
 def createNewEnemies(app):
     directions = [(1, 0), (-1, 0), (0, 1)]
-    newEnemy = Enemy(1, 15, random.choice(directions))
+    newEnemy = Enemy(10, 15, random.choice(directions))
     return newEnemy
+
+def moveEnemies(app):
+    for enemy in app.enemyDict:
+        app.enemyDict[enemy][0] += 10 * enemy.direction[0]
+        app.enemyDict[enemy][1] += 10 * enemy.direction[1]
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
@@ -76,6 +82,8 @@ def onStep(app):
             # adds enemies
             if app.spawnCounter % 5 == 0:
                 app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), random.randint(0, 200)]
+
+            moveEnemies(app)
 
             # adds player projectiles
             if app.spawnCounter % app.bullet.duration == 0:
