@@ -1,16 +1,34 @@
 from cmu_graphics import *
 
+class Player: 
+    def __init__(self, size):
+        self.size = size
+
+class Enemy:
+    def __init__(self, health, size, speed):
+        self.health = health
+        self.size = size
+        self.speed = speed
+
+class Projectile:
+    def __init__(self, size, speed):
+        self.size = size
+        self.speed = speed
+    
 def newGame(app):
     app.width = 400
     app.height = 600
     app.startMenu = True
-    app.enemyList = [[200, 100]]
     app.stepsPerSecond = 5
     app.playerX = 200
     app.playerY = 300
-    app.playerR = 25
-    app.enemyR = 10
     app.gameOver = False
+    app.enemy1 = Enemy(10, 10, 1)
+    app.player = Player(25)
+    app.bullet = Projectile(5, 1)
+    app.enemyList = [[200, 100]]
+    app.projectileList = []
+    app.counter = 0
 
 def onAppStart(app):
     newGame(app)
@@ -18,15 +36,26 @@ def onAppStart(app):
 def checkCollison(app):
     # only works for player character
     for enemy in app.enemyList:
-        if distance(app.playerX, app.playerY, enemy[0], enemy[1]) <= app.playerR + app.enemyR:
+        if distance(app.playerX, app.playerY, enemy[0], enemy[1]) <= app.player.size + app.enemy1.size:
             return True
     return False
 
 def onStep(app):
-    # enemy starts as paused since player hasn't moved
+    # everything starts as paused since player hasn't moved
     if app.startMenu != True and app.stepsPerSecond != 5:
+        # moves enemies
         for enemy in app.enemyList:
             enemy[0] += 10
+
+        # adds player projectiles
+        app.counter += 1
+        if app.counter % 5 == 0:
+            app.projectileList.append([app.playerX, app.playerY - app.player.size])
+        
+        # moves player projectiles
+        for projectile in app.projectileList:
+            projectile[1] -= 10
+
     if checkCollison(app):
         app.gameOver = True
 
@@ -48,27 +77,39 @@ def onKeyHold(app, keys):
     if 'right' in keys:
         for enemy in app.enemyList:
             enemy[0] -= 15
+        for projectile in app.projectileList:
+            projectile[0] -= 15
         if app.stepsPerSecond < 15:
             app.stepsPerSecond += 1
     elif 'left' in keys:
         for enemy in app.enemyList:
             enemy[0] += 15
+        for projectile in app.projectileList:
+            projectile[0] += 15
         if app.stepsPerSecond < 15:
             app.stepsPerSecond += 1
     elif 'up' in keys:
         for enemy in app.enemyList:
             enemy[1] += 15
+        for projectile in app.projectileList:
+            projectile[1] += 15
         if app.stepsPerSecond < 15:
             app.stepsPerSecond += 1
     elif 'down' in keys:
         for enemy in app.enemyList:
             enemy[1] -= 15
+        for projectile in app.projectileList:
+            projectile[1] -= 15
         if app.stepsPerSecond < 15:
             app.stepsPerSecond += 1
 
 def drawEnemy(app):
     for dx, dy in app.enemyList:
-        drawCircle(dx, dy, app.enemyR, fill = 'red')
+        drawCircle(dx, dy, app.enemy1.size, fill = 'red')
+
+def drawProjectiles(app):
+    for dx, dy in app.projectileList:
+        drawCircle(dx, dy, app.bullet.size, fill = 'orange')
 
 def drawMenu():
     drawLabel('Time Locker: 112 Edition', 200, 150, size = 24)
@@ -85,9 +126,10 @@ def redrawAll(app):
             drawMenu()
         else:
             drawEnemy(app)
+            drawProjectiles(app)
         
         # draw player character
-        drawCircle(app.playerX, app.playerY, app.playerR, fill = 'blue')
+        drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
     else:
         drawGameOver()
 
