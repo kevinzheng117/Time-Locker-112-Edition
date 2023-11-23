@@ -45,6 +45,7 @@ def newGame(app):
     app.projectileList = []
     app.spawnCounter = 0
     app.forwardCounter = 0
+    app.score = 0
 
 def onAppStart(app):
     newGame(app)
@@ -57,6 +58,7 @@ def checkCollison(app):
                 <= enemy.size + app.bullet.size):
                 app.enemyDict.pop(enemy)
                 app.projectileList.remove(projectile)
+                app.score += 1
             elif ((distance(app.playerX, app.playerY, projectile[0], projectile[1]) 
                    <= app.player.size+ app.bullet.size) or
                   (distance(app.playerX, app.playerY, enemyDict[enemy][0], enemyDict[enemy][1])
@@ -166,12 +168,16 @@ def drawGameOver():
     drawLabel('Game Over...', 200, 300, size = 36)
     drawLabel('Press any key to go back to menu!', 200, 400, size = 18)
 
+def drawPlayerScore(app):
+    drawLabel(f'Score: {app.score}', 50, 30, size = 20)
+
 def redrawAll(app):
     if app.gameOver == False:
         # draw start menu
         if app.startMenu == True:
             drawMenu()
         else:
+            drawPlayerScore(app)
             drawEnemy(app)
             drawProjectile(app)
             drawShadow(app)
