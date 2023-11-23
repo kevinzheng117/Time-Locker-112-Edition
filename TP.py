@@ -1,15 +1,29 @@
 from cmu_graphics import *
 import random
+import copy
 
 class Player: 
     def __init__(self, size):
         self.size = size
 
 class Enemy:
-    def __init__(self, health, size, speed):
+    nextId = 0
+
+    def __init__(self, health, size, direction):
         self.health = health
         self.size = size
-        self.speed = speed
+        self.direction = direction
+        self.id = Enemy.nextId
+        Enemy.nextId += 1
+    
+    def __repr__(self):
+        return f'{self.id}'
+    
+    def __eq__(self, other):
+        return self.id == other.id
+    
+    def __hash__(self):
+        return self.id
 
 class Projectile:
     def __init__(self, size, speed, duration):
@@ -21,14 +35,13 @@ def newGame(app):
     app.width = 400
     app.height = 600
     app.startMenu = True
-    app.stepsPerSecond = 5
+    app.stepsPerSecond = 10
     app.playerX = 200
     app.playerY = 300
     app.gameOver = False
-    app.enemy1 = Enemy(1, 15, 1)
     app.player = Player(25)
     app.bullet = Projectile(7.5, 1, 4)
-    app.enemyList = []
+    app.enemyDict = dict()
     app.projectileList = []
     app.spawnCounter = 0
     app.forwardCounter = 0
@@ -37,31 +50,32 @@ def onAppStart(app):
     newGame(app)
 
 def checkCollison(app):
-    for enemy in app.enemyList:
+    for enemy in app.enemyDict.copy():
         for projectile in app.projectileList:
-            if distance(enemy[0], enemy[1], projectile[0], projectile[1]) <= app.enemy1.size + app.bullet.size:
-                app.enemyList.remove(enemy)
+            if (distance(app.enemyDict[enemy][0], app.enemyDict[enemy][1], projectile[0], projectile[1]) 
+                <= enemy.size + app.bullet.size):
+                app.enemyDict.pop(enemy)
                 app.projectileList.remove(projectile)
-            elif (distance(app.playerX, app.playerY, projectile[0], projectile[1]) <= app.player.size+ app.bullet.size or
-                  distance(app.playerX, app.playerY, enemy[0], enemy[1]) <= app.player.size + app.enemy1.size):
+            elif ((distance(app.playerX, app.playerY, projectile[0], projectile[1]) 
+                   <= app.player.size+ app.bullet.size) or
+                  (distance(app.playerX, app.playerY, app.enemyDict[enemy][0], app.enemyDict[enemy][1])
+                   <= app.player.size + enemy.size)):
                 app.gameOver = True
 
-def addEnemies(app):
-    pass
+def createNewEnemies(app):
+    directions = [(1, 0), (-1, 0), (0, 1)]
+    newEnemy = Enemy(1, 15, random.choice(directions))
+    return newEnemy
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True:
-        if app.stepsPerSecond != 5:
+        if app.stepsPerSecond != 10:
             app.spawnCounter += 1
 
             # adds enemies
             if app.spawnCounter % 5 == 0:
-                addEnemies(app)
-
-            # moves enemies
-            for enemy in app.enemyList:
-                enemy[0] += 10
+                app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), random.randint(0, 200)]
 
             # adds player projectiles
             if app.spawnCounter % app.bullet.duration == 0:
@@ -72,10 +86,12 @@ def onStep(app):
                 projectile[1] -= 30
         
         # shadow should have constant speed regardless of game time
-        app.forwardCounter += 200 / app.stepsPerSecond 
+        app.forwardCounter += 100 / app.stepsPerSecond 
 
         # checks for any collisons then removes the projectile and enemy
         checkCollison(app)
+    
+    # checks if the shadow has caught up to the player
     if app.forwardCounter >= app.playerY:
         app.gameOver = True
 
@@ -90,40 +106,41 @@ def onKeyPress(app, key):
     
 def onKeyRelease(app, key):
     if key in {'right', 'left', 'up', 'down'}:
-        app.stepsPerSecond = 5
+        app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):   
     if 'right' in keys:
-        for enemy in app.enemyList:
-            enemy[0] -= 15
+        for enemy in app.enemyDict:
+            app.enemyDict[enemy][0] -= 15
         for projectile in app.projectileList:
             projectile[0] -= 15
     elif 'left' in keys:
-        for enemy in app.enemyList:
-            enemy[0] += 15
+        for enemy in app.enemyDict:
+            app.enemyDict[enemy][0] += 15
         for projectile in app.projectileList:
             projectile[0] += 15
     elif 'up' in keys:
-        for enemy in app.enemyList:
-            enemy[1] += 15
+        for enemy in app.enemyDict:
+            app.enemyDict[enemy][1] += 15
         for projectile in app.projectileList:
             projectile[1] += 15
             app.forwardCounter -= 10
     elif 'down' in keys:
-        for enemy in app.enemyList:
-            enemy[1] -= 15
+        for enemy in app.enemyDict:
+            app.enemyDict[enemy][1] -= 15
         for projectile in app.projectileList:
             projectile[1] -= 15
             app.forwardCounter += 10
     if 'right' or 'left' or 'up' or 'down' in keys:
-        if app.stepsPerSecond < 15:
-            app.stepsPerSecond += 1
+        if app.stepsPerSecond < 25:
+            app.stepsPerSecond += 2
 
+# move drawEnemy and drawProjectile into their classes
 def drawEnemy(app):
-    for dx, dy in app.enemyList:
-        drawCircle(dx, dy, app.enemy1.size, fill = 'red')
+    for enemy in app.enemyDict:
+        drawCircle(app.enemyDict[enemy][0], app.enemyDict[enemy][1], enemy.size, fill = 'red')
 
-def drawProjectiles(app):
+def drawProjectile(app):
     for dx, dy in app.projectileList:
         drawCircle(dx, dy, app.bullet.size, fill = 'orange')
 
@@ -146,9 +163,8 @@ def redrawAll(app):
             drawMenu()
         else:
             drawEnemy(app)
-            drawProjectiles(app)
+            drawProjectile(app)
             drawShadow(app)
-            drawLabel(f'{app.forwardCounter}', 200, 100, size = 20)
         
         # draw player character
         drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
