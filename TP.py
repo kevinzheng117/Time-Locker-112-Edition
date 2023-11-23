@@ -28,7 +28,8 @@ def newGame(app):
     app.bullet = Projectile(7.5, 1)
     app.enemyList = [[200, 100]]
     app.projectileList = []
-    app.counter = 0
+    app.spawnCounter = 0
+    app.forwardCounter = 0
 
 def onAppStart(app):
     newGame(app)
@@ -45,22 +46,28 @@ def checkCollison(app):
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
-    if app.startMenu != True and app.stepsPerSecond != 5:
-        # moves enemies
-        for enemy in app.enemyList:
-            enemy[0] += 10
+    if app.startMenu != True:
+        if app.stepsPerSecond != 5:
+            # moves enemies
+            for enemy in app.enemyList:
+                enemy[0] += 10
 
-        # adds player projectiles
-        app.counter += 1
-        if app.counter % 3 == 0:
-            app.projectileList.append([app.playerX, app.playerY - app.player.size])
+            # adds player projectiles
+            app.spawnCounter += 1
+            if app.spawnCounter % 4 == 0:
+                app.projectileList.append([app.playerX, app.playerY - app.player.size])
+            
+            # moves player projectiles
+            for projectile in app.projectileList:
+                projectile[1] -= 30
         
-        # moves player projectiles
-        for projectile in app.projectileList:
-            projectile[1] -= 30
-    
-    # checks for any collisons then removes the projectile and enemy
-    checkCollison(app)
+        # shadow should have constant speed regardless of game time
+        app.forwardCounter += 200 / app.stepsPerSecond 
+
+        # checks for any collisons then removes the projectile and enemy
+        checkCollison(app)
+    if app.forwardCounter >= app.playerY:
+        app.gameOver = True
 
 def onKeyPress(app, key):
     if app.gameOver == True:
@@ -82,27 +89,24 @@ def onKeyHold(app, keys):
             enemy[0] -= 15
         for projectile in app.projectileList:
             projectile[0] -= 15
-        if app.stepsPerSecond < 15:
-            app.stepsPerSecond += 1
     elif 'left' in keys:
         for enemy in app.enemyList:
             enemy[0] += 15
         for projectile in app.projectileList:
             projectile[0] += 15
-        if app.stepsPerSecond < 15:
-            app.stepsPerSecond += 1
     elif 'up' in keys:
         for enemy in app.enemyList:
             enemy[1] += 15
         for projectile in app.projectileList:
             projectile[1] += 15
-        if app.stepsPerSecond < 15:
-            app.stepsPerSecond += 1
+            app.forwardCounter -= 10
     elif 'down' in keys:
         for enemy in app.enemyList:
             enemy[1] -= 15
         for projectile in app.projectileList:
             projectile[1] -= 15
+            app.forwardCounter += 10
+    if 'right' or 'left' or 'up' or 'down' in keys:
         if app.stepsPerSecond < 15:
             app.stepsPerSecond += 1
 
@@ -113,6 +117,10 @@ def drawEnemy(app):
 def drawProjectiles(app):
     for dx, dy in app.projectileList:
         drawCircle(dx, dy, app.bullet.size, fill = 'orange')
+
+def drawShadow(app):
+    if app.forwardCounter > 0:
+        drawRect(0, app.height - app.forwardCounter, app.width, app.forwardCounter)
 
 def drawMenu():
     drawLabel('Time Locker: 112 Edition', 200, 150, size = 24)
@@ -130,6 +138,8 @@ def redrawAll(app):
         else:
             drawEnemy(app)
             drawProjectiles(app)
+            drawShadow(app)
+            drawLabel(f'{app.forwardCounter}', 200, 100, size = 20)
         
         # draw player character
         drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
