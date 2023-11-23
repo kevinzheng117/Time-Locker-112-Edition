@@ -23,9 +23,9 @@ def newGame(app):
     app.playerX = 200
     app.playerY = 300
     app.gameOver = False
-    app.enemy1 = Enemy(10, 10, 1)
+    app.enemy1 = Enemy(1, 15, 1)
     app.player = Player(25)
-    app.bullet = Projectile(5, 1)
+    app.bullet = Projectile(7.5, 1)
     app.enemyList = [[200, 100]]
     app.projectileList = []
     app.counter = 0
@@ -34,11 +34,14 @@ def onAppStart(app):
     newGame(app)
 
 def checkCollison(app):
-    # only works for player character
     for enemy in app.enemyList:
-        if distance(app.playerX, app.playerY, enemy[0], enemy[1]) <= app.player.size + app.enemy1.size:
-            return True
-    return False
+        for projectile in app.projectileList:
+            if distance(enemy[0], enemy[1], projectile[0], projectile[1]) <= app.enemy1.size + app.bullet.size:
+                app.enemyList.remove(enemy)
+                app.projectileList.remove(projectile)
+            elif (distance(app.playerX, app.playerY, projectile[0], projectile[1]) <= app.player.size+ app.bullet.size or
+                  distance(app.playerX, app.playerY, enemy[0], enemy[1]) <= app.player.size + app.enemy1.size):
+                app.gameOver = True
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
@@ -49,15 +52,15 @@ def onStep(app):
 
         # adds player projectiles
         app.counter += 1
-        if app.counter % 5 == 0:
+        if app.counter % 3 == 0:
             app.projectileList.append([app.playerX, app.playerY - app.player.size])
         
         # moves player projectiles
         for projectile in app.projectileList:
-            projectile[1] -= 10
-
-    if checkCollison(app):
-        app.gameOver = True
+            projectile[1] -= 30
+    
+    # checks for any collisons then removes the projectile and enemy
+    checkCollison(app)
 
 def onKeyPress(app, key):
     if app.gameOver == True:
