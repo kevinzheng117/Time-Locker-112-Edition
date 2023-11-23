@@ -73,6 +73,10 @@ def moveEnemies(app):
         app.enemyDict[enemy][0] += 10 * enemy.direction[0]
         app.enemyDict[enemy][1] += 10 * enemy.direction[1]
 
+def movePlayerProjectiles(app):
+    for projectile in app.projectileList:
+        projectile[1] -= 30
+
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True:
@@ -89,9 +93,7 @@ def onStep(app):
             if app.spawnCounter % app.bullet.duration == 0:
                 app.projectileList.append([app.playerX, app.playerY - app.player.size])
             
-            # moves player projectiles
-            for projectile in app.projectileList:
-                projectile[1] -= 30
+            movePlayerProjectiles(app)
         
         # shadow should have constant speed regardless of game time
         app.forwardCounter += 100 / app.stepsPerSecond 
