@@ -44,6 +44,7 @@ def newGame(app):
     app.enemyDict = dict()
     app.projectileList = []
     app.spawnCounter = 0
+    app.shadowCounter = 0
     app.forwardCounter = 0
     app.score = 0
 
@@ -98,13 +99,13 @@ def onStep(app):
             movePlayerProjectiles(app)
         
         # shadow should have constant speed regardless of game time
-        app.forwardCounter += 100 / app.stepsPerSecond 
+        app.shadowCounter += 50 / app.stepsPerSecond 
 
         # checks for any collisons then removes the projectile and enemy
         checkCollison(app)
     
     # checks if the shadow has caught up to the player
-    if app.forwardCounter >= app.playerY:
+    if app.shadowCounter >= app.playerY:
         app.gameOver = True
 
 def onKeyPress(app, key):
@@ -136,13 +137,15 @@ def onKeyHold(app, keys):
             app.enemyDict[enemy][1] += 15
         for projectile in app.projectileList:
             projectile[1] += 15
-            app.forwardCounter -= 10
+        app.shadowCounter -= 10
+        app.forwardCounter += 1
     elif 'down' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][1] -= 15
         for projectile in app.projectileList:
             projectile[1] -= 15
-            app.forwardCounter += 10
+        app.shadowCounter += 10
+        app.forwardCounter -= 1
     if 'right' or 'left' or 'up' or 'down' in keys:
         if app.stepsPerSecond < 25:
             app.stepsPerSecond += 2
@@ -157,8 +160,8 @@ def drawProjectile(app):
         drawCircle(dx, dy, app.bullet.size, fill = 'orange')
 
 def drawShadow(app):
-    if app.forwardCounter > 0:
-        drawRect(0, app.height - app.forwardCounter, app.width, app.forwardCounter)
+    if app.shadowCounter > 0:
+        drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter)
 
 def drawMenu():
     drawLabel('Time Locker: 112 Edition', 200, 150, size = 24)
@@ -171,6 +174,9 @@ def drawGameOver():
 def drawPlayerScore(app):
     drawLabel(f'Score: {app.score}', 50, 30, size = 20)
 
+def drawScoreLine(app):
+    pass
+
 def redrawAll(app):
     if app.gameOver == False:
         # draw start menu
@@ -181,6 +187,7 @@ def redrawAll(app):
             drawEnemy(app)
             drawProjectile(app)
             drawShadow(app)
+            drawScoreLine(app)
         
         # draw player character
         drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
