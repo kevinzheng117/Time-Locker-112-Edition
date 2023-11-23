@@ -80,6 +80,10 @@ def movePlayerProjectiles(app):
     for projectile in app.projectileList:
         projectile[1] -= 30
 
+def crossScoreLine(app):
+    if app.forwardCounter % 1000 == 300:
+        app.score += 10
+
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True:
@@ -88,7 +92,7 @@ def onStep(app):
 
             # adds enemies
             if app.spawnCounter % 5 == 0:
-                app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), random.randint(0, 200)]
+                app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), random.randint(0, 150)]
 
             moveEnemies(app)
 
@@ -103,7 +107,9 @@ def onStep(app):
 
         # checks for any collisons then removes the projectile and enemy
         checkCollison(app)
-    
+
+        crossScoreLine(app)
+
     # checks if the shadow has caught up to the player
     if app.shadowCounter >= app.playerY:
         app.gameOver = True
@@ -138,14 +144,14 @@ def onKeyHold(app, keys):
         for projectile in app.projectileList:
             projectile[1] += 15
         app.shadowCounter -= 10
-        app.forwardCounter += 1
+        app.forwardCounter += 10
     elif 'down' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][1] -= 15
         for projectile in app.projectileList:
             projectile[1] -= 15
         app.shadowCounter += 10
-        app.forwardCounter -= 1
+        app.forwardCounter -= 10
     if 'right' or 'left' or 'up' or 'down' in keys:
         if app.stepsPerSecond < 25:
             app.stepsPerSecond += 2
@@ -175,7 +181,8 @@ def drawPlayerScore(app):
     drawLabel(f'Score: {app.score}', 50, 30, size = 20)
 
 def drawScoreLine(app):
-    pass
+    if app.forwardCounter % 1000 >= 0 and app.forwardCounter % 1000 <= 300 :
+        drawLine(0, app.forwardCounter % 1000, 400, app.forwardCounter % 1000, dashes = True)
 
 def redrawAll(app):
     if app.gameOver == False:
