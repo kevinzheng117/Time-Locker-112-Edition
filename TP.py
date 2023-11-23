@@ -81,8 +81,8 @@ def movePlayerProjectiles(app):
         projectile[1] -= 30
 
 def crossScoreLine(app):
-    if app.forwardCounter % 1000 == 300:
-        app.score += 10
+    if app.forwardCounter % 2000 == 300:
+        app.score += 5
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
@@ -181,8 +181,8 @@ def drawPlayerScore(app):
     drawLabel(f'Score: {app.score}', 50, 30, size = 20)
 
 def drawScoreLine(app):
-    if app.forwardCounter % 1000 >= 0 and app.forwardCounter % 1000 <= 300 :
-        drawLine(0, app.forwardCounter % 1000, 400, app.forwardCounter % 1000, dashes = True)
+    if app.forwardCounter % 2000 >= 0 and app.forwardCounter % 2000 <= 300 :
+        drawLine(0, app.forwardCounter % 2000, 400, app.forwardCounter % 2000, dashes = True)
 
 def redrawAll(app):
     if app.gameOver == False:
