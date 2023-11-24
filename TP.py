@@ -194,7 +194,7 @@ def drawPlayer(app):
 
 # background that does not wrap around
 def drawBackground(app):
-    for j in range(3):
+    for j in range(2):
         for i in range(6):
             # horizontal line
             drawLine(app.bx + j * 200 - 10, app.by + i * 100, 
@@ -202,6 +202,17 @@ def drawBackground(app):
             # vertical line
             drawLine(app.bx + j * 200, app.by + i * 100 - 10, 
                      app.bx + j * 200, app.by + i * 100 + 10)
+    if app.bx < 10:
+        pixelsBeyondRightEdge = 10 - app.bx
+        bx = app.width - pixelsBeyondRightEdge
+        for j in range(2):
+            for i in range(6):
+                # horizontal line
+                drawLine(bx + j * 200 - 10, app.by + i * 100, 
+                        bx + j * 200 + 10, app.by + i * 100)
+                # vertical line
+                drawLine(bx + j * 200, app.by + i * 100 - 10, 
+                        bx + j * 200, app.by + i * 100 + 10)
                      
 def redrawAll(app):
     if app.gameOver == False:
