@@ -77,17 +77,31 @@ def checkCollison(app):
                     app.score += 1
                 app.projectileList.remove(projectile)
     
-    # does not work when the bullet scrapes the obstacle
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
         for projectile in app.projectileList:
-            closestX = max(obstacleDict[obstacle][0], min(app.playerX, obstacleDict[obstacle][0] + obstacle.size))
-            closestY = max(obstacleDict[obstacle][1], min(app.playerY, obstacleDict[obstacle][1] + obstacle.size))                
+            closestX = max(obstacleDict[obstacle][0], 
+                           min(projectile[0], obstacleDict[obstacle][0] + obstacle.size))
+            closestY = max(obstacleDict[obstacle][1], 
+                           min(projectile[1], obstacleDict[obstacle][1] + obstacle.size))                
             if (distance(closestX, closestY, projectile[0], projectile[1]) <= app.bullet.size):
                 obstacle.health -= app.bullet.damage
                 if obstacle.health == 0:
                     app.obstacleDict.pop(obstacle)
                 app.projectileList.remove(projectile)
+
+def playerObstacleCollison(app):
+    obstacleDict = app.obstacleDict.copy()
+    for obstacle in obstacleDict:
+        closestX = max(obstacleDict[obstacle][0], 
+                        min(app.playerX, obstacleDict[obstacle][0] + obstacle.size))
+        closestY = max(obstacleDict[obstacle][1], 
+                        min(app.playerY, obstacleDict[obstacle][1] + obstacle.size))                
+        if (distance(closestX, closestY, projectile[0], projectile[1]) <= app.bullet.size):
+            obstacle.health -= app.bullet.damage
+            if obstacle.health == 0:
+                app.obstacleDict.pop(obstacle)
+            app.projectileList.remove(projectile)
                 
 def createNewEnemies(app):
     directions = [(1, 0), (-1, 0), (0, 1)]
