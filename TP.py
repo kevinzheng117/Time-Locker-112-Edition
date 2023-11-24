@@ -159,7 +159,13 @@ def spawnEnemies(app):
         app.enemyDict[createNewEnemies(app)] = [400, random.randint(0, 150)]
     elif createNewEnemies(app).direction == (0, -1):
         app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), 0]
-        
+
+# speed game up by removing offscreen objects
+def removesObjects(app):
+    for projectile in app.projectileList:
+        if projectile[1] < -10:
+            app.projectileList.remove(projectile)
+
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True:
@@ -192,6 +198,8 @@ def onStep(app):
         crossScoreLine(app)
 
         updateHighScore(app)
+
+        removesObjects(app)
 
     # checks if the shadow has caught up to the player
     if app.shadowCounter >= app.playerY:
