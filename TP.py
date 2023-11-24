@@ -29,6 +29,10 @@ class Projectile:
         self.size = size
         self.duration = duration
         self.damage = damage
+
+class Obstacle:
+    def __init__(self, size):
+        self.size = size
     
 def newGame(app):
     app.width = 400
@@ -48,6 +52,7 @@ def newGame(app):
     app.shadowCounter = 0
     app.forwardCounter = 0
     app.score = 0
+    app.nextScoreLine = 300
 
 def onAppStart(app):
     app.highScore = 0
@@ -77,16 +82,17 @@ def createNewEnemies(app):
 
 def moveEnemies(app):
     for enemy in app.enemyDict:
-        app.enemyDict[enemy][0] += 10 * enemy.direction[0]
-        app.enemyDict[enemy][1] += 10 * enemy.direction[1]
+        app.enemyDict[enemy][0] += 5 * enemy.direction[0]
+        app.enemyDict[enemy][1] += 5 * enemy.direction[1]
 
 def movePlayerProjectiles(app):
     for projectile in app.projectileList:
         projectile[1] -= 30
 
 def crossScoreLine(app):
-    if app.forwardCounter % 2000 == 300:
+    if app.forwardCounter == app.nextScoreLine:
         app.score += 5
+        app.nextScoreLine += 2000
 
 def updateHighScore(app):
     if app.score > app.highScore:
@@ -100,7 +106,12 @@ def onStep(app):
 
             # adds enemies
             if app.spawnCounter % 5 == 0:
-                app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), random.randint(0, 150)]
+                if createNewEnemies(app).direction == (1, 0):
+                    app.enemyDict[createNewEnemies(app)] = [0, random.randint(0, 150)]
+                elif createNewEnemies(app).direction == (-1, 0):
+                    app.enemyDict[createNewEnemies(app)] = [400, random.randint(0, 150)]
+                elif createNewEnemies(app).direction == (0, -1):
+                    app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), 0]
 
             moveEnemies(app)
 
@@ -121,8 +132,8 @@ def onStep(app):
         updateHighScore(app)
 
     # checks if the shadow has caught up to the player
-    # if app.shadowCounter >= app.playerY:
-    #     app.gameOver = True
+    if app.shadowCounter >= app.playerY:
+        app.gameOver = True
 
 def onKeyPress(app, key):
     if app.gameOver == True:
@@ -171,7 +182,7 @@ def onKeyHold(app, keys):
         app.forwardCounter -= 10
         app.by -= 1
     if 'right' or 'left' or 'up' or 'down' in keys:
-        if app.stepsPerSecond < 25:
+        if app.stepsPerSecond < 40:
             app.stepsPerSecond += 2
 
 # move drawEnemy and drawProjectile into their classes
@@ -187,12 +198,12 @@ def drawShadow(app):
     if app.shadowCounter > 0:
         drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter)
 
-def drawMenu():
+def drawMenu(app):
     drawLabel('Time Locker: 112 Edition', 200, 150, size = 24)
     drawLabel('Press any key to start!', 200, 400, size = 18)
 
-def drawGameOver():
-    drawLabel('Game Over...', 200, 300, size = 36)
+def drawGameOver(app):
+    drawLabel(f'SCORE: {app.score}', 200, 300, size = 36)
     drawLabel('Press any key to go back to menu!', 200, 400, size = 18)
 
 def drawPlayerScore(app):
@@ -200,8 +211,12 @@ def drawPlayerScore(app):
     drawLabel(f'Score: {app.score}', 50, 50, size = 20)
 
 def drawScoreLine(app):
-    if app.forwardCounter % 2000 >= 0 and app.forwardCounter % 2000 <= 300 :
-        drawLine(0, app.forwardCounter % 2000, 400, app.forwardCounter % 2000, dashes = True)
+    if (app.forwardCounter % 2000 >= 0 and 
+        app.forwardCounter % 2000 <= 300 and
+        app.forwardCounter // 2000 >= app.nextScoreLine // 2000):
+        drawLine(0, app.forwardCounter % 2000, 350, app.forwardCounter % 2000, dashes = True)
+        drawRect(350, app.forwardCounter % 2000 - 15, 50, 30, fill = None, border = 'black')
+        drawLabel('+5', 375, app.forwardCounter % 2000, size = 12)
 
 def drawPlayer(app):
     drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
@@ -232,18 +247,18 @@ def redrawAll(app):
     if app.gameOver == False:
         # draw start menu
         if app.startMenu == True:
-            drawMenu()
+            drawMenu(app)
         else:
             drawPlayerScore(app)
             drawEnemy(app)
             drawProjectile(app)
-            # drawShadow(app)
+            drawShadow(app)
             drawScoreLine(app)
             drawBackground(app)
         
         drawPlayer(app)
     else:
-        drawGameOver()
+        drawGameOver(app)
 
 def main():
     runApp()
