@@ -50,6 +50,7 @@ def newGame(app):
     app.score = 0
 
 def onAppStart(app):
+    app.highScore = 0
     newGame(app)
 
 def checkCollison(app):
@@ -85,6 +86,10 @@ def crossScoreLine(app):
     if app.forwardCounter % 2000 == 300:
         app.score += 5
 
+def updateHighScore(app):
+    if app.score > app.highScore:
+        app.highScore = app.score
+
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True:
@@ -110,6 +115,8 @@ def onStep(app):
         checkCollison(app)
 
         crossScoreLine(app)
+
+        updateHighScore(app)
 
     # checks if the shadow has caught up to the player
     # if app.shadowCounter >= app.playerY:
@@ -187,7 +194,8 @@ def drawGameOver():
     drawLabel('Press any key to go back to menu!', 200, 400, size = 18)
 
 def drawPlayerScore(app):
-    drawLabel(f'Score: {app.score}', 50, 30, size = 20)
+    drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20)
+    drawLabel(f'Score: {app.score}', 50, 50, size = 20)
 
 def drawScoreLine(app):
     if app.forwardCounter % 2000 >= 0 and app.forwardCounter % 2000 <= 300 :
@@ -196,7 +204,7 @@ def drawScoreLine(app):
 def drawPlayer(app):
     drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
 
-# background that does not wrap around
+# background with partial wraparound right to left (does not work)
 def drawBackground(app):
     for j in range(2):
         for i in range(6):
