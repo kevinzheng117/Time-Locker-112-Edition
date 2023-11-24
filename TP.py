@@ -139,6 +139,7 @@ def updateHighScore(app):
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True:
+        # makes sure the player is not paused
         if app.stepsPerSecond != 10:
             app.spawnCounter += 1
 
@@ -159,7 +160,7 @@ def onStep(app):
             
             movePlayerProjectiles(app)
 
-            if app.spawnCounter % 20 == 0:
+            if app.spawnCounter % 30 == 0:
                 app.obstacleDict[createNewObstacles(app)] = [random.randint(0, 400), random.randint(0, 150)]
         
         # shadow should have constant speed regardless of game time
