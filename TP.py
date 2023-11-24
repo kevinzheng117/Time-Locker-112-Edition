@@ -25,10 +25,10 @@ class Enemy:
         return self.id
 
 class Projectile:
-    def __init__(self, size, speed, duration):
+    def __init__(self, size, duration, damage):
         self.size = size
-        self.speed = speed
         self.duration = duration
+        self.damage = damage
     
 def newGame(app):
     app.width = 400
@@ -41,7 +41,7 @@ def newGame(app):
     app.by = 0
     app.gameOver = False
     app.player = Player(25)
-    app.bullet = Projectile(7.5, 1, 4)
+    app.bullet = Projectile(7.5, 4, 1)
     app.enemyDict = dict()
     app.projectileList = []
     app.spawnCounter = 0
@@ -64,7 +64,7 @@ def checkCollison(app):
                 app.gameOver = True
             elif (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectile[0], projectile[1]) 
                 <= enemy.size + app.bullet.size):
-                enemy.health -= 1
+                enemy.health -= app.bullet.damage
                 if enemy.health == 0:
                     app.enemyDict.pop(enemy)
                     app.score += 1
