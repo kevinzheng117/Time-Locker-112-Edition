@@ -112,8 +112,8 @@ def onStep(app):
         crossScoreLine(app)
 
     # checks if the shadow has caught up to the player
-    if app.shadowCounter >= app.playerY:
-        app.gameOver = True
+    # if app.shadowCounter >= app.playerY:
+    #     app.gameOver = True
 
 def onKeyPress(app, key):
     if app.gameOver == True:
@@ -134,13 +134,17 @@ def onKeyHold(app, keys):
             app.enemyDict[enemy][0] -= 15
         for projectile in app.projectileList:
             projectile[0] -= 15
-        app.bx -= 1
+        app.bx -= 1 
+        if app.bx - 10 < 0:
+            app.bx += app.width 
     elif 'left' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][0] += 15
         for projectile in app.projectileList:
             projectile[0] += 15
         app.bx += 1
+        if app.bx >= app.width + 10:
+            app.bx = 10
     elif 'up' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][1] += 15
@@ -202,9 +206,9 @@ def drawBackground(app):
             # vertical line
             drawLine(app.bx + j * 200, app.by + i * 100 - 10, 
                      app.bx + j * 200, app.by + i * 100 + 10)
-    if app.bx < 10:
-        pixelsBeyondRightEdge = 10 - app.bx
-        bx = app.width - pixelsBeyondRightEdge
+    if app.bx > app.width - 10:
+        pixelsBeyondRightEdge = (app.bx + 10) - app.width
+        bx = -10 + pixelsBeyondRightEdge
         for j in range(2):
             for i in range(6):
                 # horizontal line
@@ -223,7 +227,7 @@ def redrawAll(app):
             drawPlayerScore(app)
             drawEnemy(app)
             drawProjectile(app)
-            drawShadow(app)
+            # drawShadow(app)
             drawScoreLine(app)
             drawBackground(app)
         
