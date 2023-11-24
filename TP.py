@@ -47,6 +47,7 @@ def newGame(app):
     app.player = Player(25)
     app.bullet = Projectile(7.5, 4, 1)
     app.enemyDict = dict()
+    app.obstacleDict = dict()
     app.projectileList = []
     app.spawnCounter = 0
     app.shadowCounter = 0
@@ -79,6 +80,10 @@ def createNewEnemies(app):
     directions = [(1, 0), (-1, 0), (0, 1)]
     newEnemy = Enemy(1, 15, random.choice(directions))
     return newEnemy
+
+def createNewObstacles(app):
+    newObstacle = Obstacle(random.randint(50, 100))
+    return newObstacle
 
 def moveEnemies(app):
     for enemy in app.enemyDict:
@@ -120,6 +125,9 @@ def onStep(app):
                 app.projectileList.append([app.playerX, app.playerY - app.player.size])
             
             movePlayerProjectiles(app)
+
+            if app.spawnCounter % 20 == 0:
+                app.obstacleDict[createNewObstacles(app)] = [random.randint(0, 400), random.randint(0, 150)]
         
         # shadow should have constant speed regardless of game time
         app.shadowCounter += 50 / app.stepsPerSecond 
@@ -152,6 +160,8 @@ def onKeyHold(app, keys):
     if 'right' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][0] -= 15
+        for obstacle in app.obstacleDict:
+            app.obstacleDict[obstacle][0] -= 15
         for projectile in app.projectileList:
             projectile[0] -= 15
         app.bx -= 1 
@@ -160,6 +170,8 @@ def onKeyHold(app, keys):
     elif 'left' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][0] += 15
+        for obstacle in app.obstacleDict:
+            app.obstacleDict[obstacle][0] += 15
         for projectile in app.projectileList:
             projectile[0] += 15
         app.bx += 1
@@ -168,6 +180,8 @@ def onKeyHold(app, keys):
     elif 'up' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][1] += 15
+        for obstacle in app.obstacleDict:
+            app.obstacleDict[obstacle][1] += 15
         for projectile in app.projectileList:
             projectile[1] += 15
         app.shadowCounter -= 10
@@ -176,6 +190,8 @@ def onKeyHold(app, keys):
     elif 'down' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][1] -= 15
+        for obstacle in app.obstacleDict:
+            app.obstacleDict[obstacle][1] -= 15
         for projectile in app.projectileList:
             projectile[1] -= 15
         app.shadowCounter += 10
@@ -189,6 +205,10 @@ def onKeyHold(app, keys):
 def drawEnemy(app):
     for enemy in app.enemyDict:
         drawCircle(app.enemyDict[enemy][0], app.enemyDict[enemy][1], enemy.size, fill = 'red')
+
+def drawObstacle(app):
+    for obstacle in app.obstacleDict:
+        drawRect(app.obstacleDict[obstacle][0], app.obstacleDict[obstacle][1], obstacle.size, obstacle.size, fill = 'green')
 
 def drawProjectile(app):
     for dx, dy in app.projectileList:
@@ -252,6 +272,7 @@ def redrawAll(app):
             drawPlayerScore(app)
             drawEnemy(app)
             drawProjectile(app)
+            drawObstacle(app)
             drawShadow(app)
             drawScoreLine(app)
             drawBackground(app)
