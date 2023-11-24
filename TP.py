@@ -160,8 +160,22 @@ def onStep(app):
             
             movePlayerProjectiles(app)
 
+            # adds obstacles
             if app.spawnCounter % 30 == 0:
-                app.obstacleDict[createNewObstacles(app)] = [random.randint(0, 400), random.randint(0, 150)]
+                # prevents overlapping obstacles from spawning
+                newObstacle = createNewObstacles(app)
+                left = random.randint(0, 400)
+                top = random.randint(0, 150)
+                for obstacle in app.obstacleDict:
+                    right0 = left + newObstacle.size
+                    bottom0 = top + newObstacle.size
+                    right1 = app.obstacleDict[obstacle][0] + obstacle.size
+                    bottom1 = app.obstacleDict[obstacle][1] + obstacle.size
+                    while ((right1 >= left) and (right0 >= app.obstacleDict[obstacle][0]) and
+                        (bottom1 >= top) and (bottom0 >= app.obstacleDict[obstacle][1])):
+                        left = random.randint(0, 400)
+                        top = random.randint(0, 150)
+                app.obstacleDict[newObstacle] = [left, top]
         
         # shadow should have constant speed regardless of game time
         app.shadowCounter += 50 / app.stepsPerSecond 
@@ -191,8 +205,7 @@ def onKeyRelease(app, key):
         app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):   
-    if 'right' in keys:
-        if playerObstacleCollison(app) != 'right':
+    if 'right' in keys and playerObstacleCollison(app) != 'right':
             # moves enemies, obstacles, projectiles
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] -= 15
@@ -205,8 +218,7 @@ def onKeyHold(app, keys):
             app.bx -= 1 
             if app.bx - 10 < 0:
                 app.bx += app.width 
-    elif 'left' in keys:
-        if playerObstacleCollison(app) != 'left':
+    elif 'left' in keys and playerObstacleCollison(app) != 'left':
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] += 15
             for obstacle in app.obstacleDict:
@@ -217,8 +229,7 @@ def onKeyHold(app, keys):
             app.bx += 1
             if app.bx >= app.width + 10:
                 app.bx = 10
-    elif 'up' in keys:
-        if playerObstacleCollison(app) != 'up':
+    elif 'up' in keys and playerObstacleCollison(app) != 'up':
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] += 15
             for obstacle in app.obstacleDict:
@@ -232,8 +243,7 @@ def onKeyHold(app, keys):
 
             # moves background (no up-down wrap around implemented yet)
             app.by += 1
-    elif 'down' in keys:
-        if playerObstacleCollison(app) != 'down':
+    elif 'down' in keys and playerObstacleCollison(app) != 'down':
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] -= 15
             for obstacle in app.obstacleDict:
