@@ -57,20 +57,22 @@ def checkCollison(app):
     enemyDict = app.enemyDict.copy()
     for enemy in enemyDict:
         for projectile in app.projectileList:
-            if (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectile[0], projectile[1]) 
-                <= enemy.size + app.bullet.size):
-                app.enemyDict.pop(enemy)
-                app.projectileList.remove(projectile)
-                app.score += 1
-            elif ((distance(app.playerX, app.playerY, projectile[0], projectile[1]) 
+            if ((distance(app.playerX, app.playerY, projectile[0], projectile[1]) 
                    <= app.player.size+ app.bullet.size) or
                   (distance(app.playerX, app.playerY, enemyDict[enemy][0], enemyDict[enemy][1])
                    <= app.player.size + enemy.size)):
                 app.gameOver = True
+            elif (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectile[0], projectile[1]) 
+                <= enemy.size + app.bullet.size):
+                enemy.health -= 1
+                if enemy.health == 0:
+                    app.enemyDict.pop(enemy)
+                    app.score += 1
+                app.projectileList.remove(projectile)
 
 def createNewEnemies(app):
     directions = [(1, 0), (-1, 0), (0, 1)]
-    newEnemy = Enemy(10, 15, random.choice(directions))
+    newEnemy = Enemy(1, 15, random.choice(directions))
     return newEnemy
 
 def moveEnemies(app):
