@@ -33,6 +33,7 @@ class Projectile:
 class Obstacle:
     def __init__(self, size):
         self.size = size
+        self.health = size // 10
     
 def newGame(app):
     app.width = 400
@@ -64,9 +65,9 @@ def checkCollison(app):
     for enemy in enemyDict:
         for projectile in app.projectileList:
             if ((distance(app.playerX, app.playerY, projectile[0], projectile[1]) 
-                   <= app.player.size+ app.bullet.size) or
-                  (distance(app.playerX, app.playerY, enemyDict[enemy][0], enemyDict[enemy][1])
-                   <= app.player.size + enemy.size)):
+                <= app.player.size + app.bullet.size) or
+                (distance(app.playerX, app.playerY, enemyDict[enemy][0], enemyDict[enemy][1])
+                <= app.player.size + enemy.size)):
                 app.gameOver = True
             elif (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectile[0], projectile[1]) 
                 <= enemy.size + app.bullet.size):
@@ -75,7 +76,18 @@ def checkCollison(app):
                     app.enemyDict.pop(enemy)
                     app.score += 1
                 app.projectileList.remove(projectile)
-
+    
+    obstacleDict = app.obstacleDict.copy()
+    for obstacle in obstacleDict:
+        for projectile in app.projectileList:
+            closestX = max(obstacleDict[obstacle][0], min(app.playerX, obstacleDict[obstacle][0] + obstacle.size))
+            closestY = max(obstacleDict[obstacle][1], min(app.playerY, obstacleDict[obstacle][1] + obstacle.size))                
+            if (distance(closestX, closestY, projectile[0], projectile[1]) <= app.bullet.size):
+                obstacle.health -= app.bullet.damage
+                if obstacle.health == 0:
+                    app.obstacleDict.pop(obstacle)
+                app.projectileList.remove(projectile)
+                
 def createNewEnemies(app):
     directions = [(1, 0), (-1, 0), (0, 1)]
     newEnemy = Enemy(1, 15, random.choice(directions))
@@ -158,12 +170,15 @@ def onKeyRelease(app, key):
 
 def onKeyHold(app, keys):   
     if 'right' in keys:
+        # moves enemies, obstacles, projectiles
         for enemy in app.enemyDict:
             app.enemyDict[enemy][0] -= 15
         for obstacle in app.obstacleDict:
             app.obstacleDict[obstacle][0] -= 15
         for projectile in app.projectileList:
-            projectile[0] -= 15
+            projectile[0] -= 15\
+        
+        # moves background (for right-left wrap around)
         app.bx -= 1 
         if app.bx - 10 < 0:
             app.bx += app.width 
@@ -174,6 +189,7 @@ def onKeyHold(app, keys):
             app.obstacleDict[obstacle][0] += 15
         for projectile in app.projectileList:
             projectile[0] += 15
+
         app.bx += 1
         if app.bx >= app.width + 10:
             app.bx = 10
@@ -184,8 +200,12 @@ def onKeyHold(app, keys):
             app.obstacleDict[obstacle][1] += 15
         for projectile in app.projectileList:
             projectile[1] += 15
+        
+        # keeps track for shadow and score line
         app.shadowCounter -= 10
         app.forwardCounter += 10
+
+        # moves background (no up-down wrap around implemented yet)
         app.by += 1
     elif 'down' in keys:
         for enemy in app.enemyDict:
@@ -194,11 +214,13 @@ def onKeyHold(app, keys):
             app.obstacleDict[obstacle][1] -= 15
         for projectile in app.projectileList:
             projectile[1] -= 15
+        
         app.shadowCounter += 10
         app.forwardCounter -= 10
+
         app.by -= 1
     if 'right' or 'left' or 'up' or 'down' in keys:
-        if app.stepsPerSecond < 40:
+        if app.stepsPerSecond < 50:
             app.stepsPerSecond += 2
 
 # move drawEnemy and drawProjectile into their classes
@@ -208,7 +230,8 @@ def drawEnemy(app):
 
 def drawObstacle(app):
     for obstacle in app.obstacleDict:
-        drawRect(app.obstacleDict[obstacle][0], app.obstacleDict[obstacle][1], obstacle.size, obstacle.size, fill = 'green')
+        drawRect(app.obstacleDict[obstacle][0], app.obstacleDict[obstacle][1], 
+                 obstacle.size, obstacle.size, fill = 'green')
 
 def drawProjectile(app):
     for dx, dy in app.projectileList:
