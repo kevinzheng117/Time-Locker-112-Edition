@@ -184,6 +184,15 @@ def drawScoreLine(app):
     if app.forwardCounter % 2000 >= 0 and app.forwardCounter % 2000 <= 300 :
         drawLine(0, app.forwardCounter % 2000, 400, app.forwardCounter % 2000, dashes = True)
 
+def drawPlayer(app):
+    drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
+
+def drawBackground(app):
+    for j in range(3):
+        for i in range(6):
+            drawLine(j * 200 - 10, i * 100, j * 200 + 10, i * 100)  # horizontal
+            drawLine(j * 200, i * 100 - 10, j * 200, i * 100 + 10)  # vertical
+
 def redrawAll(app):
     if app.gameOver == False:
         # draw start menu
@@ -195,9 +204,9 @@ def redrawAll(app):
             drawProjectile(app)
             drawShadow(app)
             drawScoreLine(app)
+            drawBackground(app)
         
-        # draw player character
-        drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
+        drawPlayer(app)
     else:
         drawGameOver()
 
