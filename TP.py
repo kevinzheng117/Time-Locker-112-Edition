@@ -77,6 +77,7 @@ def checkCollison(app):
                     app.score += 1
                 app.projectileList.remove(projectile)
     
+    # does not work when the bullet scrapes the obstacle
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
         for projectile in app.projectileList:
