@@ -136,6 +136,30 @@ def updateHighScore(app):
     if app.score > app.highScore:
         app.highScore = app.score
 
+# prevents overlapping obstacles from spawning
+def spawnObstacles(app):
+    newObstacle = createNewObstacles(app)
+    left = random.randint(0, 400)
+    top = random.randint(0, 150)
+    for obstacle in app.obstacleDict:
+        right0 = left + newObstacle.size
+        bottom0 = top + newObstacle.size
+        right1 = app.obstacleDict[obstacle][0] + obstacle.size
+        bottom1 = app.obstacleDict[obstacle][1] + obstacle.size
+        while ((right1 >= left) and (right0 >= app.obstacleDict[obstacle][0]) and
+            (bottom1 >= top) and (bottom0 >= app.obstacleDict[obstacle][1])):
+            left = random.randint(0, 400)
+            top = random.randint(0, 150)
+    app.obstacleDict[newObstacle] = [left, top]
+
+def spawnEnemies(app):
+    if createNewEnemies(app).direction == (1, 0):
+        app.enemyDict[createNewEnemies(app)] = [0, random.randint(0, 150)]
+    elif createNewEnemies(app).direction == (-1, 0):
+        app.enemyDict[createNewEnemies(app)] = [400, random.randint(0, 150)]
+    elif createNewEnemies(app).direction == (0, -1):
+        app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), 0]
+        
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True:
@@ -143,42 +167,24 @@ def onStep(app):
         if app.stepsPerSecond != 10:
             app.spawnCounter += 1
 
-            # adds enemies
+            # spawns enemies
             if app.spawnCounter % 5 == 0:
-                if createNewEnemies(app).direction == (1, 0):
-                    app.enemyDict[createNewEnemies(app)] = [0, random.randint(0, 150)]
-                elif createNewEnemies(app).direction == (-1, 0):
-                    app.enemyDict[createNewEnemies(app)] = [400, random.randint(0, 150)]
-                elif createNewEnemies(app).direction == (0, -1):
-                    app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), 0]
+                spawnEnemies(app)
 
             moveEnemies(app)
 
-            # adds player projectiles
+            # spawns player projectiles
             if app.spawnCounter % app.bullet.duration == 0:
                 app.projectileList.append([app.playerX, app.playerY - app.player.size])
             
             movePlayerProjectiles(app)
 
-            # adds obstacles
+            # spawns obstacles
             if app.spawnCounter % 30 == 0:
-                # prevents overlapping obstacles from spawning
-                newObstacle = createNewObstacles(app)
-                left = random.randint(0, 400)
-                top = random.randint(0, 150)
-                for obstacle in app.obstacleDict:
-                    right0 = left + newObstacle.size
-                    bottom0 = top + newObstacle.size
-                    right1 = app.obstacleDict[obstacle][0] + obstacle.size
-                    bottom1 = app.obstacleDict[obstacle][1] + obstacle.size
-                    while ((right1 >= left) and (right0 >= app.obstacleDict[obstacle][0]) and
-                        (bottom1 >= top) and (bottom0 >= app.obstacleDict[obstacle][1])):
-                        left = random.randint(0, 400)
-                        top = random.randint(0, 150)
-                app.obstacleDict[newObstacle] = [left, top]
+                spawnObstacles(app)
         
         # shadow should have constant speed regardless of game time
-        app.shadowCounter += 50 / app.stepsPerSecond 
+        app.shadowCounter += 75 / app.stepsPerSecond 
 
         # checks for any collisons then removes the projectile and enemy
         checkCollison(app)
