@@ -1,6 +1,5 @@
 from cmu_graphics import *
 import random
-import copy
 
 class Player: 
     def __init__(self, size):
@@ -38,6 +37,8 @@ def newGame(app):
     app.stepsPerSecond = 10
     app.playerX = 200
     app.playerY = 300
+    app.bx = 0
+    app.by = 0
     app.gameOver = False
     app.player = Player(25)
     app.bullet = Projectile(7.5, 1, 4)
@@ -133,11 +134,13 @@ def onKeyHold(app, keys):
             app.enemyDict[enemy][0] -= 15
         for projectile in app.projectileList:
             projectile[0] -= 15
+        app.bx -= 1
     elif 'left' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][0] += 15
         for projectile in app.projectileList:
             projectile[0] += 15
+        app.bx += 1
     elif 'up' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][1] += 15
@@ -145,6 +148,7 @@ def onKeyHold(app, keys):
             projectile[1] += 15
         app.shadowCounter -= 10
         app.forwardCounter += 10
+        app.by += 1
     elif 'down' in keys:
         for enemy in app.enemyDict:
             app.enemyDict[enemy][1] -= 15
@@ -152,6 +156,7 @@ def onKeyHold(app, keys):
             projectile[1] -= 15
         app.shadowCounter += 10
         app.forwardCounter -= 10
+        app.by -= 1
     if 'right' or 'left' or 'up' or 'down' in keys:
         if app.stepsPerSecond < 25:
             app.stepsPerSecond += 2
@@ -187,12 +192,17 @@ def drawScoreLine(app):
 def drawPlayer(app):
     drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
 
+# background that does not wrap around
 def drawBackground(app):
     for j in range(3):
         for i in range(6):
-            drawLine(j * 200 - 10, i * 100, j * 200 + 10, i * 100)  # horizontal
-            drawLine(j * 200, i * 100 - 10, j * 200, i * 100 + 10)  # vertical
-
+            # horizontal line
+            drawLine(app.bx + j * 200 - 10, app.by + i * 100, 
+                     app.bx + j * 200 + 10, app.by + i * 100)
+            # vertical line
+            drawLine(app.bx + j * 200, app.by + i * 100 - 10, 
+                     app.bx + j * 200, app.by + i * 100 + 10)
+                     
 def redrawAll(app):
     if app.gameOver == False:
         # draw start menu
