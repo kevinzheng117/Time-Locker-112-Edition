@@ -33,7 +33,7 @@ class Projectile:
 class Obstacle:
     def __init__(self, size):
         self.size = size
-        self.health = size // 10
+        self.health = size // 5
     
 def newGame(app):
     app.width = 400
@@ -96,12 +96,18 @@ def playerObstacleCollison(app):
         closestX = max(obstacleDict[obstacle][0], 
                         min(app.playerX, obstacleDict[obstacle][0] + obstacle.size))
         closestY = max(obstacleDict[obstacle][1], 
-                        min(app.playerY, obstacleDict[obstacle][1] + obstacle.size))                
-        if (distance(closestX, closestY, projectile[0], projectile[1]) <= app.bullet.size):
-            obstacle.health -= app.bullet.damage
-            if obstacle.health == 0:
-                app.obstacleDict.pop(obstacle)
-            app.projectileList.remove(projectile)
+                        min(app.playerY, obstacleDict[obstacle][1] + obstacle.size))
+        if (distance(closestX, closestY, app.playerX, app.playerY) <= app.player.size):
+            if app.playerX > closestX:
+                return 'left'
+            elif app.playerX < closestX:
+                return 'right'
+            elif app.playerY > closestY:
+                return 'up'
+            elif app.playerY < closestY:
+                return 'down'
+            else:
+                return None
                 
 def createNewEnemies(app):
     directions = [(1, 0), (-1, 0), (0, 1)]
@@ -185,55 +191,59 @@ def onKeyRelease(app, key):
 
 def onKeyHold(app, keys):   
     if 'right' in keys:
-        # moves enemies, obstacles, projectiles
-        for enemy in app.enemyDict:
-            app.enemyDict[enemy][0] -= 15
-        for obstacle in app.obstacleDict:
-            app.obstacleDict[obstacle][0] -= 15
-        for projectile in app.projectileList:
-            projectile[0] -= 15\
-        
-        # moves background (for right-left wrap around)
-        app.bx -= 1 
-        if app.bx - 10 < 0:
-            app.bx += app.width 
+        if playerObstacleCollison(app) != 'right':
+            # moves enemies, obstacles, projectiles
+            for enemy in app.enemyDict:
+                app.enemyDict[enemy][0] -= 15
+            for obstacle in app.obstacleDict:
+                app.obstacleDict[obstacle][0] -= 15
+            for projectile in app.projectileList:
+                projectile[0] -= 15\
+            
+            # moves background (for right-left wrap around)
+            app.bx -= 1 
+            if app.bx - 10 < 0:
+                app.bx += app.width 
     elif 'left' in keys:
-        for enemy in app.enemyDict:
-            app.enemyDict[enemy][0] += 15
-        for obstacle in app.obstacleDict:
-            app.obstacleDict[obstacle][0] += 15
-        for projectile in app.projectileList:
-            projectile[0] += 15
+        if playerObstacleCollison(app) != 'left':
+            for enemy in app.enemyDict:
+                app.enemyDict[enemy][0] += 15
+            for obstacle in app.obstacleDict:
+                app.obstacleDict[obstacle][0] += 15
+            for projectile in app.projectileList:
+                projectile[0] += 15
 
-        app.bx += 1
-        if app.bx >= app.width + 10:
-            app.bx = 10
+            app.bx += 1
+            if app.bx >= app.width + 10:
+                app.bx = 10
     elif 'up' in keys:
-        for enemy in app.enemyDict:
-            app.enemyDict[enemy][1] += 15
-        for obstacle in app.obstacleDict:
-            app.obstacleDict[obstacle][1] += 15
-        for projectile in app.projectileList:
-            projectile[1] += 15
-        
-        # keeps track for shadow and score line
-        app.shadowCounter -= 10
-        app.forwardCounter += 10
+        if playerObstacleCollison(app) != 'up':
+            for enemy in app.enemyDict:
+                app.enemyDict[enemy][1] += 15
+            for obstacle in app.obstacleDict:
+                app.obstacleDict[obstacle][1] += 15
+            for projectile in app.projectileList:
+                projectile[1] += 15
+            
+            # keeps track for shadow and score line
+            app.shadowCounter -= 10
+            app.forwardCounter += 10
 
-        # moves background (no up-down wrap around implemented yet)
-        app.by += 1
+            # moves background (no up-down wrap around implemented yet)
+            app.by += 1
     elif 'down' in keys:
-        for enemy in app.enemyDict:
-            app.enemyDict[enemy][1] -= 15
-        for obstacle in app.obstacleDict:
-            app.obstacleDict[obstacle][1] -= 15
-        for projectile in app.projectileList:
-            projectile[1] -= 15
-        
-        app.shadowCounter += 10
-        app.forwardCounter -= 10
+        if playerObstacleCollison(app) != 'down':
+            for enemy in app.enemyDict:
+                app.enemyDict[enemy][1] -= 15
+            for obstacle in app.obstacleDict:
+                app.obstacleDict[obstacle][1] -= 15
+            for projectile in app.projectileList:
+                projectile[1] -= 15
+            
+            app.shadowCounter += 10
+            app.forwardCounter -= 10
 
-        app.by -= 1
+            app.by -= 1
     if 'right' or 'left' or 'up' or 'down' in keys:
         if app.stepsPerSecond < 50:
             app.stepsPerSecond += 2
