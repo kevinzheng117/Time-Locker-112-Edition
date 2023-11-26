@@ -90,6 +90,7 @@ def checkCollison(app):
                     app.obstacleDict.pop(obstacle)
                 app.projectileList.remove(projectile)
 
+# square circle collison
 def playerObstacleCollison(app):
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
@@ -157,7 +158,7 @@ def spawnEnemies(app):
         app.enemyDict[createNewEnemies(app)] = [0, random.randint(0, 150)]
     elif createNewEnemies(app).direction == (-1, 0):
         app.enemyDict[createNewEnemies(app)] = [400, random.randint(0, 150)]
-    elif createNewEnemies(app).direction == (0, -1):
+    elif createNewEnemies(app).direction == (0, 1):
         app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), 0]
 
 # speed game up by removing offscreen objects
@@ -165,6 +166,14 @@ def removesObjects(app):
     for projectile in app.projectileList:
         if projectile[1] < -10:
             app.projectileList.remove(projectile)
+
+    # removes enemies that are 200 pixels offscreen behind or 400 pixels right or left
+    enemyDict = app.enemyDict.copy()
+    for enemy in enemyDict:
+        if app.enemyDict[enemy][1] > 800:
+            app.enemyDict.pop(enemy)
+        elif app.enemyDict[enemy][0] > 800 or app.enemyDict[enemy][0] < -400:
+            app.enemyDict.pop(enemy)
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
