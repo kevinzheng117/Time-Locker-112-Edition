@@ -1,5 +1,6 @@
 from cmu_graphics import *
 import random
+import copy
 
 class Player: 
     def __init__(self, size):
@@ -325,25 +326,26 @@ def drawPlayer(app):
 
 # background with partial wraparound right to left (does not work)
 def drawBackground(app):
-    for j in range(2):
-        for i in range(6):
-            # horizontal line
-            drawLine(app.bx + j * 200 - 10, app.by + i * 100, 
-                     app.bx + j * 200 + 10, app.by + i * 100)
-            # vertical line
-            drawLine(app.bx + j * 200, app.by + i * 100 - 10, 
-                     app.bx + j * 200, app.by + i * 100 + 10)
-    if app.bx > app.width - 10:
-        pixelsBeyondRightEdge = (app.bx + 10) - app.width
-        bx = -10 + pixelsBeyondRightEdge
-        for j in range(2):
-            for i in range(6):
-                # horizontal line
-                drawLine(bx + j * 200 - 10, app.by + i * 100, 
-                        bx + j * 200 + 10, app.by + i * 100)
-                # vertical line
-                drawLine(bx + j * 200, app.by + i * 100 - 10, 
-                        bx + j * 200, app.by + i * 100 + 10)
+    # for j in range(2):
+    #     for i in range(6):
+    #         # horizontal line
+    #         drawLine(app.bx + j * 200 - 10, app.by + i * 100, 
+    #                  app.bx + j * 200 + 10, app.by + i * 100)
+    #         # vertical line
+    #         drawLine(app.bx + j * 200, app.by + i * 100 - 10, 
+    #                  app.bx + j * 200, app.by + i * 100 + 10)
+    # if app.bx > app.width - 10:
+    #     pixelsBeyondRightEdge = (app.bx + 10) - app.width
+    #     bx = -10 + pixelsBeyondRightEdge
+    #     for j in range(2):
+    #         for i in range(6):
+    #             # horizontal line
+    #             drawLine(bx + j * 200 - 10, app.by + i * 100, 
+    #                     bx + j * 200 + 10, app.by + i * 100)
+    #             # vertical line
+    #             drawLine(bx + j * 200, app.by + i * 100 - 10, 
+    #                     bx + j * 200, app.by + i * 100 + 10)
+    drawImage(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\cyberpunk-pixel-art-background.jpg", 0, 0)
                      
 def redrawAll(app):
     if app.gameOver == False:
@@ -351,13 +353,13 @@ def redrawAll(app):
         if app.startMenu == True:
             drawMenu(app)
         else:
+            drawBackground(app)
             drawPlayerScore(app)
             drawEnemy(app)
             drawProjectile(app)
             drawObstacle(app)
             drawShadow(app)
             drawScoreLine(app)
-            drawBackground(app)
         
         drawPlayer(app)
     else:
