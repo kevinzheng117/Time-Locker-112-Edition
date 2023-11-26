@@ -56,6 +56,8 @@ def newGame(app):
     app.forwardCounter = 0
     app.score = 0
     app.nextScoreLine = 300
+    app.imageX = 0
+    app.imageY = 0
 
 def onAppStart(app):
     app.highScore = 0
@@ -236,7 +238,8 @@ def onKeyHold(app, keys):
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][0] -= 15
             for projectile in app.projectileList:
-                projectile[0] -= 15\
+                projectile[0] -= 15
+            app.imageX -= 15
             
             # moves background (for right-left wrap around)
             app.bx -= 1 
@@ -249,6 +252,7 @@ def onKeyHold(app, keys):
                 app.obstacleDict[obstacle][0] += 15
             for projectile in app.projectileList:
                 projectile[0] += 15
+            app.imageX += 15
 
             app.bx += 1
             if app.bx >= app.width + 10:
@@ -260,6 +264,7 @@ def onKeyHold(app, keys):
                 app.obstacleDict[obstacle][1] += 15
             for projectile in app.projectileList:
                 projectile[1] += 15
+            app.imageY += 15
             
             # keeps track for shadow and score line
             app.shadowCounter -= 10
@@ -274,6 +279,7 @@ def onKeyHold(app, keys):
                 app.obstacleDict[obstacle][1] -= 15
             for projectile in app.projectileList:
                 projectile[1] -= 15
+            app.imageY -= 15
             
             app.shadowCounter += 10
             app.forwardCounter -= 10
@@ -345,7 +351,7 @@ def drawBackground(app):
     #             # vertical line
     #             drawLine(bx + j * 200, app.by + i * 100 - 10, 
     #                     bx + j * 200, app.by + i * 100 + 10)
-    drawImage(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\cyberpunk-pixel-art-background.jpg", 0, 0)
+    drawImage(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\cyberpunk-pixel-art-background.jpg", app.imageX, app.imageY)
                      
 def redrawAll(app):
     if app.gameOver == False:
