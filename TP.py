@@ -37,10 +37,11 @@ class Enemy:
 class Projectile:
     nextId = 0
 
-    def __init__(self, size, duration, damage):
+    def __init__(self, size, duration, damage, direction):
         self.size = size
         self.duration = duration
         self.damage = damage
+        self.direction = direction
         self.id = Projectile.nextId
         Projectile.nextId += 1
     
@@ -195,9 +196,10 @@ def moveEnemies(app):
         else:
             moveToPlayer(app, enemy)
 
-def movePlayerProjectiles(app):
+def moveProjectiles(app):
     for projectile in app.projectileDict:
-        app.projectileDict[projectile][1] -= 30
+        app.projectileDict[projectile][0] += projectile.direction[0] * 30
+        app.projectileDict[projectile][1] += projectile.direction[1] * 30
 
 def moveEnemyProjectiles(app):
     # for enemy in app.enemyDict:
@@ -238,8 +240,8 @@ def spawnEnemies(app):
     elif createNewEnemies(app).direction == (0, 1):
         app.enemyDict[createNewEnemies(app)] = [random.randint(0, 600), 0]
     
-def spawnProjectiles(app):
-    app.projectileDict[Projectile(7.5, 4, 1)] = [app.player.x, app.player.y - app.player.size]
+def spawnPlayerProjectiles(app):
+    app.projectileDict[Projectile(7.5, 4, 1, (0, -1))] = [app.player.x, app.player.y - app.player.size]
 
 # speed game up by removing offscreen objects
 def removesObjects(app):
@@ -278,11 +280,11 @@ def onStep(app):
 
             moveEnemies(app)
 
-            # spawns player projectiles
+            # spawns projectiles
             if app.spawnCounter % 4 == 0:
                 spawnProjectiles(app)
             
-            movePlayerProjectiles(app)
+            moveProjectiles(app)
 
             # spawns obstacles
             if app.spawnCounter % 30 == 0:
