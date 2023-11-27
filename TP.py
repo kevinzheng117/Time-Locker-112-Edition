@@ -59,7 +59,7 @@ class Obstacle:
     def __init__(self, size):
         self.size = size
         # health is proportional to its size
-        self.health = size // 10
+        self.health = size // 5
     
 def newGame(app):
     app.width = 600
