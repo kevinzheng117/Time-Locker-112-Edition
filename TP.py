@@ -37,9 +37,8 @@ class Enemy:
 class Projectile:
     nextId = 0
 
-    def __init__(self, size, duration, damage, direction):
+    def __init__(self, size, damage, direction):
         self.size = size
-        self.duration = duration
         self.damage = damage
         self.direction = direction
         self.id = Projectile.nextId
@@ -107,6 +106,8 @@ def onAppStart(app):
 def checkCollison(app):
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
+
+    # player, enemy-projectile collison
     for enemy in enemyDict:
         for projectile in projectileDict:
             if ((distance(app.player.x, app.player.y, projectileDict[projectile][0], projectileDict[projectile][1]) 
@@ -126,6 +127,7 @@ def checkCollison(app):
                         app.score += 2
                 app.projectileDict.pop(projectile)
     
+    # projectile-obstacle collison: not perfect since circle can be in square
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
         for projectile in projectileDict:
@@ -169,7 +171,7 @@ def createNewEnemies(app):
         follow = False
     else:
         follow = True
-        if num == 10:
+        if num >= 9:
             shoot = True
     newEnemy = Enemy(1, 15, random.choice(directions), follow, shoot)
     return newEnemy
@@ -200,12 +202,6 @@ def moveProjectiles(app):
     for projectile in app.projectileDict:
         app.projectileDict[projectile][0] += projectile.direction[0] * 30
         app.projectileDict[projectile][1] += projectile.direction[1] * 30
-
-def moveEnemyProjectiles(app):
-    # for enemy in app.enemyDict:
-    #     if enemy.shoot == True:
-    #         app.projectileList.append(app.enemyDict[enemy][0] - enemy.size, app.enemyDict[1] - enemy.size)
-    pass
 
 def crossScoreLine(app):
     if app.forwardCounter == app.nextScoreLine:
@@ -241,7 +237,18 @@ def spawnEnemies(app):
         app.enemyDict[createNewEnemies(app)] = [random.randint(0, 600), 0]
     
 def spawnPlayerProjectiles(app):
-    app.projectileDict[Projectile(7.5, 4, 1, (0, -1))] = [app.player.x, app.player.y - app.player.size]
+    app.projectileDict[Projectile(7.5, 1, (0, -1))] = [app.player.x, app.player.y - app.player.size]
+
+def spawnEnemyProjectiles(app):
+    for enemy in app.enemyDict:
+        if enemy.shoot == True:
+            directionX = app.enemyDict[enemy][0] - app.player.x
+            directionY = app.enemyDict[enemy][1] - app.player.y
+            magnitude = math.sqrt(directionX ** 2 + directionY ** 2)
+            directionX /= magnitude
+            directionY /= magnitude
+            direction = (-directionX, -directionY)
+            app.projectileDict[Projectile(7.5, 1, direction)] = [app.enemyDict[enemy][0], app.enemyDict[enemy][1]]
 
 # speed game up by removing offscreen objects
 def removesObjects(app):
@@ -280,9 +287,12 @@ def onStep(app):
 
             moveEnemies(app)
 
-            # spawns projectiles
+            # spawns player projectiles
             if app.spawnCounter % 4 == 0:
-                spawnProjectiles(app)
+                spawnPlayerProjectiles(app)
+
+            if app.spawnCounter % 10 == 0:
+                spawnEnemyProjectiles(app)
             
             moveProjectiles(app)
 
@@ -383,10 +393,13 @@ def onKeyHold(app, keys):
 # move drawEnemy and drawProjectile into their classes
 def drawEnemy(app):
     for enemy in app.enemyDict:
-        if enemy.follow == False:
-            color = 'red'
-        else:
+        if enemy.follow == True and enemy.shoot == True:
+            color = 'deepPink'
+        elif enemy.follow == True:
             color = 'purple'
+        else:
+            color = 'red'
+
         drawCircle(app.enemyDict[enemy][0], app.enemyDict[enemy][1], enemy.size, fill = color)
 
 def drawObstacle(app):
@@ -396,7 +409,12 @@ def drawObstacle(app):
 
 def drawProjectile(app):
     for projectile in app.projectileDict:
-        drawCircle(app.projectileDict[projectile][0], app.projectileDict[projectile][1], projectile.size, fill = 'orange')
+        if projectile.direction == (0, -1):
+            color = 'orange'
+        else:
+            color = 'cyan'
+        
+        drawCircle(app.projectileDict[projectile][0], app.projectileDict[projectile][1], projectile.size, fill = color)
 
 def drawShadow(app):
     if app.shadowCounter > 0:
