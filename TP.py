@@ -23,9 +23,11 @@ class Enemy:
         self.id = Enemy.nextId
         Enemy.nextId += 1
     
+    # for debugging
     def __repr__(self):
         return f'{self.id, self.follow}'
     
+    # needs to be able to be stored in dictionaries
     def __eq__(self, other):
         return self.id == other.id
     
