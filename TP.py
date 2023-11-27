@@ -64,18 +64,26 @@ def newGame(app):
     app.backgroundImageX = 0
     app.backgroundImageY = 0
 
-    # source: https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/pixel-art-of-80s-retro-sci-fi-background-herbert.jpg
-    app.backgroundImage = Image.open(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\background image.jpg")
-    app.backgroundImageWidth,app.backgroundImageHeight = app.backgroundImage.width, app.backgroundImage.height
+    ''' 
+    source: https://images.fineartamerica.com/images/artworkimages/mediumlarge
+    /3/pixel-art-of-80s-retro-sci-fi-background-herbert.jpg
+    '''
+    app.backgroundImage = Image.open(
+        r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\background image.jpg")
+    app.backgroundImageWidth = app.backgroundImage.width
+    app.backgroundImageHeight =  app.backgroundImage.height
     app.backgroundImage = CMUImage(app.backgroundImage)
 
     '''
-    tried implementing images as obstacles (resize in function then convert to CMU image)
+    tried implementing images as obstacles 
+    (resize in function then convert to CMU image)
     but slowed down program significantly
     '''
     # source: https://i.pinimg.com/550x/20/84/42/208442642ff691ac20846b9376db3830.jpg
-    app.obstacleImage = Image.open(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\obstacle.jpg")
-    app.obstacleImageWidth,app.obstacleImageHeight = app.obstacleImage.width, app.obstacleImage.height
+    app.obstacleImage = Image.open(
+        r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\obstacle.jpg")
+    app.obstacleImageWidth = app.obstacleImage.width
+    app.obstacleImageHeight = app.obstacleImage.height
 
 def onAppStart(app):
     app.highScore = 0
@@ -388,7 +396,8 @@ def drawScoreLine(app):
     if (app.forwardCounter % 2000 >= 0 and 
         app.forwardCounter % 2000 <= 300 and
         app.forwardCounter // 2000 >= app.nextScoreLine // 2000):
-        drawLine(0, app.forwardCounter % 2000, 550, app.forwardCounter % 2000, dashes = True, fill = 'white')
+        drawLine(0, app.forwardCounter % 2000, 550, app.forwardCounter % 2000,
+                 dashes = True, fill = 'white')
         drawRect(550, app.forwardCounter % 2000 - 15, 50, 30, fill = None, border = 'white')
         drawLabel('+5', 575, app.forwardCounter % 2000, size = 12, fill = 'white')
 
@@ -398,7 +407,8 @@ def drawPlayer(app):
 def drawBackground(app):
     for i in range(-1, 2):
         for j in range(-1, 2):
-            drawImage(app.backgroundImage, (i * 600) + app.backgroundImageX, (j * 600) + app.backgroundImageY)
+            drawImage(app.backgroundImage, (i * 600) + app.backgroundImageX, 
+                      (j * 600) + app.backgroundImageY)
                          
 def redrawAll(app):
     if app.gameOver == False:
