@@ -6,8 +6,10 @@ import os, pathlib
 import copy
 
 class Player: 
-    def __init__(self, size):
+    def __init__(self, size, x, y):
         self.size = size
+        self.x = x
+        self.y = y
 
 class Enemy:
     nextId = 0
@@ -45,10 +47,8 @@ def newGame(app):
     app.height = 600
     app.startMenu = True
     app.stepsPerSecond = 10
-    app.playerX = 300
-    app.playerY = 300
     app.gameOver = False
-    app.player = Player(25)
+    app.player = Player(25, 300, 300)
     app.bullet = Projectile(7.5, 4, 1)
     app.enemyDict = dict()
     app.obstacleDict = dict()
@@ -82,9 +82,9 @@ def checkCollison(app):
     enemyDict = app.enemyDict.copy()
     for enemy in enemyDict:
         for projectile in app.projectileList:
-            if ((distance(app.playerX, app.playerY, projectile[0], projectile[1]) 
+            if ((distance(app.player.x, app.player.y, projectile[0], projectile[1]) 
                 <= app.player.size + app.bullet.size) or
-                (distance(app.playerX, app.playerY, enemyDict[enemy][0], enemyDict[enemy][1])
+                (distance(app.player.x, app.player.y, enemyDict[enemy][0], enemyDict[enemy][1])
                 <= app.player.size + enemy.size)):
                 app.gameOver = True
             elif (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectile[0], projectile[1]) 
@@ -113,17 +113,17 @@ def playerObstacleCollison(app):
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
         closestX = max(obstacleDict[obstacle][0], 
-                        min(app.playerX, obstacleDict[obstacle][0] + obstacle.size))
+                        min(app.player.x, obstacleDict[obstacle][0] + obstacle.size))
         closestY = max(obstacleDict[obstacle][1], 
-                        min(app.playerY, obstacleDict[obstacle][1] + obstacle.size))
-        if (distance(closestX, closestY, app.playerX, app.playerY) <= app.player.size):
-            if app.playerX > closestX:
+                        min(app.player.y, obstacleDict[obstacle][1] + obstacle.size))
+        if (distance(closestX, closestY, app.player.x, app.player.y) <= app.player.size):
+            if app.player.x > closestX:
                 return 'left'
-            elif app.playerX < closestX:
+            elif app.player.x < closestX:
                 return 'right'
-            elif app.playerY > closestY:
+            elif app.player.y > closestY:
                 return 'up'
-            elif app.playerY < closestY:
+            elif app.player.y < closestY:
                 return 'down'
             else:
                 return None
@@ -145,8 +145,8 @@ def createNewObstacles(app):
 
 # uses 2D unit vector to determine player direction
 def moveToPlayer(app, enemy):
-    directionX = app.enemyDict[enemy][0] - app.playerX
-    directionY = app.enemyDict[enemy][1] - app.playerY
+    directionX = app.enemyDict[enemy][0] - app.player.x
+    directionY = app.enemyDict[enemy][1] - app.player.y
     magnitude = math.sqrt(directionX ** 2 + directionY ** 2)
     directionX /= magnitude
     directionY /= magnitude
@@ -212,15 +212,18 @@ def removesObjects(app):
             app.enemyDict.pop(enemy)
         elif app.enemyDict[enemy][0] > 1200 or app.enemyDict[enemy][0] < -600:
             app.enemyDict.pop(enemy)
+        # removes enemies that get caught by the shadow
+        elif app.enemyDict[enemy][1] >= app.height - app.shadowCounter:
+            app.enemyDict.pop(enemy)
 
 # checks if the shadow has caught up to the player
 def checkShadow(app):
-    if app.shadowCounter >= app.playerY:
+    if app.shadowCounter >= app.player.y:
         app.gameOver = True
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
-    if app.startMenu != True:
+    if app.startMenu != True and app.gameOver == False:
         # makes sure the player is not paused
         if app.stepsPerSecond != 10:
             app.spawnCounter += 1
@@ -233,7 +236,7 @@ def onStep(app):
 
             # spawns player projectiles
             if app.spawnCounter % app.bullet.duration == 0:
-                app.projectileList.append([app.playerX, app.playerY - app.player.size])
+                app.projectileList.append([app.player.x, app.player.y - app.player.size])
             
             movePlayerProjectiles(app)
 
@@ -374,7 +377,7 @@ def drawScoreLine(app):
         drawLabel('+5', 575, app.forwardCounter % 2000, size = 12, fill = 'white')
 
 def drawPlayer(app):
-    drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
+    drawCircle(app.player.x, app.player.y, app.player.size, fill = 'blue')
 
 def drawBackground(app):
     for i in range(-1, 2):
