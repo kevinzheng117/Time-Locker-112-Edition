@@ -1,5 +1,6 @@
 from cmu_graphics import *
 import random
+from PIL import Image
 import copy
 
 class Player: 
@@ -37,14 +38,12 @@ class Obstacle:
         self.health = size // 5
     
 def newGame(app):
-    app.width = 400
+    app.width = 600
     app.height = 600
     app.startMenu = True
     app.stepsPerSecond = 10
-    app.playerX = 200
+    app.playerX = 300
     app.playerY = 300
-    app.bx = 0
-    app.by = 0
     app.gameOver = False
     app.player = Player(25)
     app.bullet = Projectile(7.5, 4, 1)
@@ -56,8 +55,18 @@ def newGame(app):
     app.forwardCounter = 0
     app.score = 0
     app.nextScoreLine = 300
-    app.imageX = 0
-    app.imageY = 0
+    app.backgroundImageX = 0
+    app.backgroundImageY = 0
+    app.backgroundImage = Image.open(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\background image.jpg")
+    app.backgroundImageWidth,app.backgroundImageHeight = app.backgroundImage.width, app.backgroundImage.height
+    app.backgroundImage = CMUImage(app.backgroundImage)
+
+    '''
+    tried implementing images as obstacles (resize in function then convert to CMU image)
+    but slowed down program significantly
+    '''
+    app.obstacleImage = Image.open(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\obstacle.jpg")
+    app.obstacleImageWidth,app.obstacleImageHeight = app.obstacleImage.width, app.obstacleImage.height
 
 def onAppStart(app):
     app.highScore = 0
@@ -143,7 +152,7 @@ def updateHighScore(app):
 # prevents overlapping obstacles from spawning
 def spawnObstacles(app):
     newObstacle = createNewObstacles(app)
-    left = random.randint(0, 400)
+    left = random.randint(0, 600)
     top = random.randint(0, 150)
     for obstacle in app.obstacleDict:
         right0 = left + newObstacle.size
@@ -152,7 +161,7 @@ def spawnObstacles(app):
         bottom1 = app.obstacleDict[obstacle][1] + obstacle.size
         while ((right1 >= left) and (right0 >= app.obstacleDict[obstacle][0]) and
             (bottom1 >= top) and (bottom0 >= app.obstacleDict[obstacle][1])):
-            left = random.randint(0, 400)
+            left = random.randint(0, 600)
             top = random.randint(0, 150)
     app.obstacleDict[newObstacle] = [left, top]
 
@@ -160,9 +169,9 @@ def spawnEnemies(app):
     if createNewEnemies(app).direction == (1, 0):
         app.enemyDict[createNewEnemies(app)] = [0, random.randint(0, 150)]
     elif createNewEnemies(app).direction == (-1, 0):
-        app.enemyDict[createNewEnemies(app)] = [400, random.randint(0, 150)]
+        app.enemyDict[createNewEnemies(app)] = [600, random.randint(0, 150)]
     elif createNewEnemies(app).direction == (0, 1):
-        app.enemyDict[createNewEnemies(app)] = [random.randint(0, 400), 0]
+        app.enemyDict[createNewEnemies(app)] = [random.randint(0, 600), 0]
 
 # speed game up by removing offscreen objects
 def removesObjects(app):
@@ -170,13 +179,18 @@ def removesObjects(app):
         if projectile[1] < -10:
             app.projectileList.remove(projectile)
 
-    # removes enemies that are 200 pixels offscreen behind or 400 pixels right or left
+    # removes enemies that are 300 pixels offscreen behind or 600 pixels right or left
     enemyDict = app.enemyDict.copy()
     for enemy in enemyDict:
-        if app.enemyDict[enemy][1] > 800:
+        if app.enemyDict[enemy][1] > 900:
             app.enemyDict.pop(enemy)
-        elif app.enemyDict[enemy][0] > 800 or app.enemyDict[enemy][0] < -400:
+        elif app.enemyDict[enemy][0] > 1200 or app.enemyDict[enemy][0] < -600:
             app.enemyDict.pop(enemy)
+
+# checks if the shadow has caught up to the player
+def checkShadow(app):
+    if app.shadowCounter >= app.playerY:
+        app.gameOver = True
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
@@ -213,9 +227,7 @@ def onStep(app):
 
         removesObjects(app)
 
-    # checks if the shadow has caught up to the player
-    if app.shadowCounter >= app.playerY:
-        app.gameOver = True
+        checkShadow(app)
 
 def onKeyPress(app, key):
     if app.gameOver == True:
@@ -239,12 +251,11 @@ def onKeyHold(app, keys):
                 app.obstacleDict[obstacle][0] -= 15
             for projectile in app.projectileList:
                 projectile[0] -= 15
-            app.imageX -= 15
             
-            # moves background (for right-left wrap around)
-            app.bx -= 1 
-            if app.bx - 10 < 0:
-                app.bx += app.width 
+            # moves background
+            app.backgroundImageX -= 15
+            if app.backgroundImageX == -app.backgroundImageWidth:
+                app.backgroundImageX = 0
     elif 'left' in keys and playerObstacleCollison(app) != 'left':
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] += 15
@@ -252,11 +263,10 @@ def onKeyHold(app, keys):
                 app.obstacleDict[obstacle][0] += 15
             for projectile in app.projectileList:
                 projectile[0] += 15
-            app.imageX += 15
 
-            app.bx += 1
-            if app.bx >= app.width + 10:
-                app.bx = 10
+            app.backgroundImageX += 15
+            if app.backgroundImageX == app.backgroundImageWidth:
+                app.backgroundImageX = 0
     elif 'up' in keys and playerObstacleCollison(app) != 'up':
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] += 15
@@ -264,14 +274,15 @@ def onKeyHold(app, keys):
                 app.obstacleDict[obstacle][1] += 15
             for projectile in app.projectileList:
                 projectile[1] += 15
-            app.imageY += 15
             
             # keeps track for shadow and score line
             app.shadowCounter -= 10
             app.forwardCounter += 10
 
             # moves background (no up-down wrap around implemented yet)
-            app.by += 1
+            app.backgroundImageY += 15
+            if app.backgroundImageY == app.backgroundImageHeight:
+                app.backgroundImageY = 0
     elif 'down' in keys and playerObstacleCollison(app) != 'down':
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] -= 15
@@ -279,12 +290,13 @@ def onKeyHold(app, keys):
                 app.obstacleDict[obstacle][1] -= 15
             for projectile in app.projectileList:
                 projectile[1] -= 15
-            app.imageY -= 15
             
             app.shadowCounter += 10
             app.forwardCounter -= 10
 
-            app.by -= 1
+            app.backgroundImageY -= 15
+            if app.backgroundImageY == -app.backgroundImageHeight:
+                app.backgroundImageY = 0
     if 'right' or 'left' or 'up' or 'down' in keys:
         if app.stepsPerSecond < 50:
             app.stepsPerSecond += 2
@@ -308,12 +320,12 @@ def drawShadow(app):
         drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter)
 
 def drawMenu(app):
-    drawLabel('Time Locker: 112 Edition', 200, 150, size = 24)
-    drawLabel('Press any key to start!', 200, 400, size = 18)
+    drawLabel('Time Locker: 112 Edition', 300, 150, size = 36, fill = 'white')
+    drawLabel('Press any key to start!', 300, 400, size = 24, fill = 'white')
 
 def drawGameOver(app):
-    drawLabel(f'SCORE: {app.score}', 200, 300, size = 36)
-    drawLabel('Press any key to go back to menu!', 200, 400, size = 18)
+    drawLabel(f'SCORE: {app.score}', 300, 300, size = 36)
+    drawLabel('Press any key to go back to menu!', 300, 400, size = 18)
 
 def drawPlayerScore(app):
     drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20)
@@ -323,43 +335,27 @@ def drawScoreLine(app):
     if (app.forwardCounter % 2000 >= 0 and 
         app.forwardCounter % 2000 <= 300 and
         app.forwardCounter // 2000 >= app.nextScoreLine // 2000):
-        drawLine(0, app.forwardCounter % 2000, 350, app.forwardCounter % 2000, dashes = True)
-        drawRect(350, app.forwardCounter % 2000 - 15, 50, 30, fill = None, border = 'black')
-        drawLabel('+5', 375, app.forwardCounter % 2000, size = 12)
+        drawLine(0, app.forwardCounter % 2000, 550, app.forwardCounter % 2000, dashes = True, fill = 'white')
+        drawRect(550, app.forwardCounter % 2000 - 15, 50, 30, fill = None, border = 'white')
+        drawLabel('+5', 575, app.forwardCounter % 2000, size = 12, fill = 'white')
 
 def drawPlayer(app):
     drawCircle(app.playerX, app.playerY, app.player.size, fill = 'blue')
 
-# background with partial wraparound right to left (does not work)
 def drawBackground(app):
-    # for j in range(2):
-    #     for i in range(6):
-    #         # horizontal line
-    #         drawLine(app.bx + j * 200 - 10, app.by + i * 100, 
-    #                  app.bx + j * 200 + 10, app.by + i * 100)
-    #         # vertical line
-    #         drawLine(app.bx + j * 200, app.by + i * 100 - 10, 
-    #                  app.bx + j * 200, app.by + i * 100 + 10)
-    # if app.bx > app.width - 10:
-    #     pixelsBeyondRightEdge = (app.bx + 10) - app.width
-    #     bx = -10 + pixelsBeyondRightEdge
-    #     for j in range(2):
-    #         for i in range(6):
-    #             # horizontal line
-    #             drawLine(bx + j * 200 - 10, app.by + i * 100, 
-    #                     bx + j * 200 + 10, app.by + i * 100)
-    #             # vertical line
-    #             drawLine(bx + j * 200, app.by + i * 100 - 10, 
-    #                     bx + j * 200, app.by + i * 100 + 10)
-    drawImage(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\cyberpunk-pixel-art-background.jpg", app.imageX, app.imageY)
-                     
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            drawImage(app.backgroundImage, (i * 600) + app.backgroundImageX, (j * 600) + app.backgroundImageY)
+                         
 def redrawAll(app):
     if app.gameOver == False:
+        # want player and background to appear in the start menu
+        drawBackground(app)
+        drawPlayer(app)
         # draw start menu
         if app.startMenu == True:
             drawMenu(app)
         else:
-            drawBackground(app)
             drawPlayerScore(app)
             drawEnemy(app)
             drawProjectile(app)
@@ -367,7 +363,6 @@ def redrawAll(app):
             drawShadow(app)
             drawScoreLine(app)
         
-        drawPlayer(app)
     else:
         drawGameOver(app)
 
