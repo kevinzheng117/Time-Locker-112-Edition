@@ -105,8 +105,10 @@ def onAppStart(app):
     newGame(app)
 
 def playerEnemyProjectileCollison(app):
+    # bug needs fixing, not sure why
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
+    print(app.projectileDict)
     for enemy in enemyDict:
         for projectile in projectileDict:
             if ((distance(app.player.x, app.player.y, projectileDict[projectile][0], projectileDict[projectile][1]) 
@@ -168,13 +170,13 @@ def createNewEnemies(app):
     # twice as likely to spawn enemies that move down
     directions = [(1, 0), (-1, 0), (0, 1), (0, 1)]
     # 30% chance of special enemy spawning
-    num = random.randint(1, 10)
+    num = random.randint(1, 20)
     shoot = False
-    if num <= 7:
+    if num <= 15:
         follow = False
     else:
         follow = True
-        if num == 10:
+        if num == 20:
             shoot = True
     newEnemy = Enemy(1, 15, random.choice(directions), follow, shoot)
     return newEnemy
@@ -208,7 +210,7 @@ def moveProjectiles(app):
 
 def crossScoreLine(app):
     if app.forwardCounter == app.nextScoreLine:
-        app.score += 5
+        app.score += 10
         app.nextScoreLine += 2000
 
 def updateHighScore(app):
@@ -444,7 +446,7 @@ def drawScoreLine(app):
         drawLine(0, app.forwardCounter % 2000, 550, app.forwardCounter % 2000,
                  dashes = True, fill = 'white')
         drawRect(550, app.forwardCounter % 2000 - 15, 50, 30, fill = None, border = 'white')
-        drawLabel('+5', 575, app.forwardCounter % 2000, size = 12, fill = 'white')
+        drawLabel('+10', 575, app.forwardCounter % 2000, size = 12, fill = 'white')
 
 def drawPlayer(app):
     drawCircle(app.player.x, app.player.y, app.player.size, fill = 'blue')
