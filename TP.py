@@ -58,7 +58,8 @@ class Projectile:
 class Obstacle:
     def __init__(self, size):
         self.size = size
-        self.health = size // 5
+        # health is proportional to its size
+        self.health = size // 10
     
 def newGame(app):
     app.width = 600
@@ -103,11 +104,9 @@ def onAppStart(app):
     app.highScore = 0
     newGame(app)
 
-def checkCollison(app):
+def playerEnemyProjectileCollison(app):
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
-
-    # player, enemy-projectile collison
     for enemy in enemyDict:
         for projectile in projectileDict:
             if ((distance(app.player.x, app.player.y, projectileDict[projectile][0], projectileDict[projectile][1]) 
@@ -121,13 +120,17 @@ def checkCollison(app):
                 enemy.health -= projectile.damage
                 if enemy.health == 0:
                     app.enemyDict.pop(enemy)
-                    if enemy.follow == False:
-                        app.score += 1
+                    if enemy.follow == True and enemy.shoot == True:
+                        app.score += 3
                     elif enemy.follow == True:
                         app.score += 2
+                    else:
+                        app.score += 1
                 app.projectileDict.pop(projectile)
     
-    # projectile-obstacle collison: not perfect since circle can be in square
+def projectileObstacleCollison(app):
+     # not perfect since circle can be in square
+    projectileDict = app.projectileDict.copy()
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
         for projectile in projectileDict:
@@ -171,7 +174,7 @@ def createNewEnemies(app):
         follow = False
     else:
         follow = True
-        if num >= 9:
+        if num == 10:
             shoot = True
     newEnemy = Enemy(1, 15, random.choice(directions), follow, shoot)
     return newEnemy
@@ -304,7 +307,9 @@ def onStep(app):
         app.shadowCounter += 75 / app.stepsPerSecond 
 
         # checks for any collisons then removes the projectile and enemy
-        checkCollison(app)
+        playerEnemyProjectileCollison(app)
+
+        projectileObstacleCollison(app)
 
         crossScoreLine(app)
 
@@ -394,11 +399,11 @@ def onKeyHold(app, keys):
 def drawEnemy(app):
     for enemy in app.enemyDict:
         if enemy.follow == True and enemy.shoot == True:
-            color = 'deepPink'
-        elif enemy.follow == True:
             color = 'purple'
-        else:
+        elif enemy.follow == True:
             color = 'red'
+        else:
+            color = 'deepPink'
 
         drawCircle(app.enemyDict[enemy][0], app.enemyDict[enemy][1], enemy.size, fill = color)
 
