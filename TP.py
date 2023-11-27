@@ -129,7 +129,8 @@ def playerObstacleCollison(app):
                 return None
                 
 def createNewEnemies(app):
-    directions = [(1, 0), (-1, 0), (0, 1)]
+    # twice as likely to spawn enemies that move down
+    directions = [(1, 0), (-1, 0), (0, 1), (0, 1)]
     # 30% chance of special enemy spawning
     num = random.randint(1, 10)
     if num <= 7:
