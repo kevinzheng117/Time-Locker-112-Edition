@@ -296,7 +296,7 @@ def onStep(app):
             if app.spawnCounter % 4 == 0:
                 spawnPlayerProjectiles(app)
 
-            if app.spawnCounter % 10 == 0:
+            if app.spawnCounter % 12 == 0:
                 spawnEnemyProjectiles(app)
             
             moveProjectiles(app)
