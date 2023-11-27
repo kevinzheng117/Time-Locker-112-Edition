@@ -1,6 +1,8 @@
 from cmu_graphics import *
 import random
 from PIL import Image
+import math
+import os, pathlib
 import copy
 
 class Player: 
@@ -10,15 +12,16 @@ class Player:
 class Enemy:
     nextId = 0
 
-    def __init__(self, health, size, direction):
+    def __init__(self, health, size, direction, follow):
         self.health = health
         self.size = size
         self.direction = direction
+        self.follow = follow
         self.id = Enemy.nextId
         Enemy.nextId += 1
     
     def __repr__(self):
-        return f'{self.id}'
+        return f'{self.id, self.follow}'
     
     def __eq__(self, other):
         return self.id == other.id
@@ -127,7 +130,13 @@ def playerObstacleCollison(app):
                 
 def createNewEnemies(app):
     directions = [(1, 0), (-1, 0), (0, 1)]
-    newEnemy = Enemy(1, 15, random.choice(directions))
+    # 20% chance of special enemy spawning
+    num = random.randint(1, 5)
+    if num <= 4:
+        follow = False
+    else:
+        follow = True
+    newEnemy = Enemy(1, 15, random.choice(directions), True)
     return newEnemy
 
 def createNewObstacles(app):
@@ -179,21 +188,38 @@ def spawnEnemies(app):
 # speed game up by removing offscreen objects
 def removesObjects(app):
     for projectile in app.projectileList:
+        # remove player projectiles that move off screen
         if projectile[1] < -10:
             app.projectileList.remove(projectile)
+        elif app.shadowCounter >= projectile[1]:
+            app.projectileList.remove(projectile)
 
-    # removes enemies that are 300 pixels offscreen behind or 600 pixels right or left
     enemyDict = app.enemyDict.copy()
     for enemy in enemyDict:
+        # removes enemies that are 300 pixels offscreen behind or 600 pixels right or left
         if app.enemyDict[enemy][1] > 900:
             app.enemyDict.pop(enemy)
         elif app.enemyDict[enemy][0] > 1200 or app.enemyDict[enemy][0] < -600:
             app.enemyDict.pop(enemy)
+        # removes enemies that get caught by the shadow
+        elif app.shadowCounter >= app.enemyDict[enemy][1]:
+            app.enemyDict.pop(enemy)
+
 
 # checks if the shadow has caught up to the player
 def checkShadow(app):
     if app.shadowCounter >= app.playerY:
         app.gameOver = True
+
+# uses 2D unit vector to determine player direction
+def moveToPlayer(app, enemy):
+    directionX = app.enemyDict[enemy][0] - app.playerX
+    directionY = app.enemyDict[enemy][1] - app.playerY
+    magnitude = math.sqrt(directionX ** 2 + directionY ** 2)
+    directionX /= magnitude
+    directionY /= magnitude
+    app.enemyDict[enemy][0] += directionX * 15
+    app.enemyDict[enemy][1] += directionY * 15
 
 def onStep(app):
     # everything starts as paused since player hasn't moved
@@ -232,6 +258,8 @@ def onStep(app):
 
         checkShadow(app)
 
+        print(app.enemyDict)
+
 def onKeyPress(app, key):
     if app.gameOver == True:
         if key != None:
@@ -249,7 +277,8 @@ def onKeyHold(app, keys):
     if 'right' in keys and playerObstacleCollison(app) != 'right' and app.gameOver == False:
             # moves enemies, obstacles, projectiles
             for enemy in app.enemyDict:
-                app.enemyDict[enemy][0] -= 15
+                if enemy.follow == False:
+                    app.enemyDict[enemy][0] -= 15
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][0] -= 15
             for projectile in app.projectileList:
@@ -261,7 +290,8 @@ def onKeyHold(app, keys):
                 app.backgroundImageX = 0
     elif 'left' in keys and playerObstacleCollison(app) != 'left' and app.gameOver == False:
             for enemy in app.enemyDict:
-                app.enemyDict[enemy][0] += 15
+                if enemy.follow == False:
+                    app.enemyDict[enemy][0] += 15
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][0] += 15
             for projectile in app.projectileList:
@@ -272,7 +302,8 @@ def onKeyHold(app, keys):
                 app.backgroundImageX = 0
     elif 'up' in keys and playerObstacleCollison(app) != 'up' and app.gameOver == False:
             for enemy in app.enemyDict:
-                app.enemyDict[enemy][1] += 15
+                if enemy.follow == False:
+                    app.enemyDict[enemy][1] += 15
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][1] += 15
             for projectile in app.projectileList:
@@ -288,7 +319,8 @@ def onKeyHold(app, keys):
                 app.backgroundImageY = 0
     elif 'down' in keys and playerObstacleCollison(app) != 'down' and app.gameOver == False:
             for enemy in app.enemyDict:
-                app.enemyDict[enemy][1] -= 15
+                if enemy.follow == False:
+                    app.enemyDict[enemy][1] -= 15
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][1] -= 15
             for projectile in app.projectileList:
@@ -303,6 +335,9 @@ def onKeyHold(app, keys):
     if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
         if app.stepsPerSecond < 50:
             app.stepsPerSecond += 2
+        for enemy in app.enemyDict:
+            if enemy.follow == True:
+                moveToPlayer(app, enemy)
 
 # move drawEnemy and drawProjectile into their classes
 def drawEnemy(app):
