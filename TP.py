@@ -57,6 +57,8 @@ def newGame(app):
     app.nextScoreLine = 300
     app.backgroundImageX = 0
     app.backgroundImageY = 0
+
+    # source: https://images.fineartamerica.com/images/artworkimages/mediumlarge/3/pixel-art-of-80s-retro-sci-fi-background-herbert.jpg
     app.backgroundImage = Image.open(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\background image.jpg")
     app.backgroundImageWidth,app.backgroundImageHeight = app.backgroundImage.width, app.backgroundImage.height
     app.backgroundImage = CMUImage(app.backgroundImage)
@@ -65,6 +67,7 @@ def newGame(app):
     tried implementing images as obstacles (resize in function then convert to CMU image)
     but slowed down program significantly
     '''
+    # source: https://i.pinimg.com/550x/20/84/42/208442642ff691ac20846b9376db3830.jpg
     app.obstacleImage = Image.open(r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\obstacle.jpg")
     app.obstacleImageWidth,app.obstacleImageHeight = app.obstacleImage.width, app.obstacleImage.height
 
@@ -243,7 +246,7 @@ def onKeyRelease(app, key):
         app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):   
-    if 'right' in keys and playerObstacleCollison(app) != 'right':
+    if 'right' in keys and playerObstacleCollison(app) != 'right' and app.gameOver == False:
             # moves enemies, obstacles, projectiles
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] -= 15
@@ -256,7 +259,7 @@ def onKeyHold(app, keys):
             app.backgroundImageX -= 15
             if app.backgroundImageX == -app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif 'left' in keys and playerObstacleCollison(app) != 'left':
+    elif 'left' in keys and playerObstacleCollison(app) != 'left' and app.gameOver == False:
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] += 15
             for obstacle in app.obstacleDict:
@@ -267,7 +270,7 @@ def onKeyHold(app, keys):
             app.backgroundImageX += 15
             if app.backgroundImageX == app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif 'up' in keys and playerObstacleCollison(app) != 'up':
+    elif 'up' in keys and playerObstacleCollison(app) != 'up' and app.gameOver == False:
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] += 15
             for obstacle in app.obstacleDict:
@@ -283,7 +286,7 @@ def onKeyHold(app, keys):
             app.backgroundImageY += 15
             if app.backgroundImageY == app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    elif 'down' in keys and playerObstacleCollison(app) != 'down':
+    elif 'down' in keys and playerObstacleCollison(app) != 'down' and app.gameOver == False:
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] -= 15
             for obstacle in app.obstacleDict:
@@ -297,7 +300,7 @@ def onKeyHold(app, keys):
             app.backgroundImageY -= 15
             if app.backgroundImageY == -app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    if 'right' or 'left' or 'up' or 'down' in keys:
+    if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
         if app.stepsPerSecond < 50:
             app.stepsPerSecond += 2
 
@@ -324,12 +327,12 @@ def drawMenu(app):
     drawLabel('Press any key to start!', 300, 400, size = 24, fill = 'white')
 
 def drawGameOver(app):
-    drawLabel(f'SCORE: {app.score}', 300, 300, size = 36)
-    drawLabel('Press any key to go back to menu!', 300, 400, size = 18)
+    drawLabel(f'SCORE: {app.score}', 300, 300, size = 36, fill = 'white')
+    drawLabel('Press any key to go back to menu!', 300, 400, size = 18, fill = 'white')
 
 def drawPlayerScore(app):
-    drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20)
-    drawLabel(f'Score: {app.score}', 50, 50, size = 20)
+    drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20, fill = 'white')
+    drawLabel(f'Score: {app.score}', 50, 50, size = 20, fill = 'white')
 
 def drawScoreLine(app):
     if (app.forwardCounter % 2000 >= 0 and 
@@ -364,6 +367,7 @@ def redrawAll(app):
             drawScoreLine(app)
         
     else:
+        drawBackground(app)
         drawGameOver(app)
 
 def main():
