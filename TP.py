@@ -93,7 +93,10 @@ def checkCollison(app):
                 enemy.health -= app.bullet.damage
                 if enemy.health == 0:
                     app.enemyDict.pop(enemy)
-                    app.score += 1
+                    if enemy.follow == False:
+                        app.score += 1
+                    elif enemy.follow == True:
+                        app.score += 2
                 app.projectileList.remove(projectile)
     
     obstacleDict = app.obstacleDict.copy()
