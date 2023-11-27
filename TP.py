@@ -25,7 +25,7 @@ class Enemy:
     
     # for debugging
     def __repr__(self):
-        return f'{self.id, self.follow}'
+        return f'{self.id}'
     
     # needs to be able to be stored in dictionaries
     def __eq__(self, other):
@@ -35,10 +35,25 @@ class Enemy:
         return self.id
 
 class Projectile:
+    nextId = 0
+
     def __init__(self, size, duration, damage):
         self.size = size
         self.duration = duration
         self.damage = damage
+        self.id = Projectile.nextId
+        Projectile.nextId += 1
+    
+    # for debugging
+    def __repr__(self):
+        return f'{self.id}'
+    
+    # needs to be able to be stored in dictionaries
+    def __eq__(self, other):
+        return self.id == other.id
+    
+    def __hash__(self):
+        return self.id
 
 class Obstacle:
     def __init__(self, size):
@@ -52,10 +67,9 @@ def newGame(app):
     app.stepsPerSecond = 10
     app.gameOver = False
     app.player = Player(25, 300, 300)
-    app.bullet = Projectile(7.5, 4, 1)
     app.enemyDict = dict()
     app.obstacleDict = dict()
-    app.projectileList = []
+    app.projectileDict = dict()
     app.spawnCounter = 0
     app.shadowCounter = 0
     app.forwardCounter = 0
@@ -91,36 +105,38 @@ def onAppStart(app):
 
 def checkCollison(app):
     enemyDict = app.enemyDict.copy()
+    projectileDict = app.projectileDict.copy()
     for enemy in enemyDict:
-        for projectile in app.projectileList:
-            if ((distance(app.player.x, app.player.y, projectile[0], projectile[1]) 
-                <= app.player.size + app.bullet.size) or
+        for projectile in projectileDict:
+            if ((distance(app.player.x, app.player.y, projectileDict[projectile][0], projectileDict[projectile][1]) 
+                <= app.player.size + projectile.size) or
                 (distance(app.player.x, app.player.y, enemyDict[enemy][0], enemyDict[enemy][1])
                 <= app.player.size + enemy.size)):
                 app.gameOver = True
-            elif (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectile[0], projectile[1]) 
-                <= enemy.size + app.bullet.size):
-                enemy.health -= app.bullet.damage
+                
+            elif (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectileDict[projectile][0], projectileDict[projectile][1]) 
+                <= enemy.size + projectile.size):
+                enemy.health -= projectile.damage
                 if enemy.health == 0:
                     app.enemyDict.pop(enemy)
                     if enemy.follow == False:
                         app.score += 1
                     elif enemy.follow == True:
                         app.score += 2
-                app.projectileList.remove(projectile)
+                app.projectileDict.pop(projectile)
     
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
-        for projectile in app.projectileList:
+        for projectile in projectileDict:
             closestX = max(obstacleDict[obstacle][0], 
-                           min(projectile[0], obstacleDict[obstacle][0] + obstacle.size))
+                           min(projectileDict[projectile][0], obstacleDict[obstacle][0] + obstacle.size))
             closestY = max(obstacleDict[obstacle][1], 
-                           min(projectile[1], obstacleDict[obstacle][1] + obstacle.size))                
-            if (distance(closestX, closestY, projectile[0], projectile[1]) <= app.bullet.size):
-                obstacle.health -= app.bullet.damage
+                           min(projectileDict[projectile][1], obstacleDict[obstacle][1] + obstacle.size))                
+            if (distance(closestX, closestY, projectileDict[projectile][0], projectileDict[projectile][1]) <= projectile.size):
+                obstacle.health -= projectile.damage
                 if obstacle.health == 0:
                     app.obstacleDict.pop(obstacle)
-                app.projectileList.remove(projectile)
+                app.projectileDict.pop(projectile)
 
 # square circle collison
 def playerObstacleCollison(app):
@@ -180,8 +196,8 @@ def moveEnemies(app):
             moveToPlayer(app, enemy)
 
 def movePlayerProjectiles(app):
-    for projectile in app.projectileList:
-        projectile[1] -= 30
+    for projectile in app.projectileDict:
+        app.projectileDict[projectile][1] -= 30
 
 def moveEnemyProjectiles(app):
     # for enemy in app.enemyDict:
@@ -221,13 +237,17 @@ def spawnEnemies(app):
         app.enemyDict[createNewEnemies(app)] = [600, random.randint(0, 150)]
     elif createNewEnemies(app).direction == (0, 1):
         app.enemyDict[createNewEnemies(app)] = [random.randint(0, 600), 0]
+    
+def spawnProjectiles(app):
+    app.projectileDict[Projectile(7.5, 4, 1)] = [app.player.x, app.player.y - app.player.size]
 
 # speed game up by removing offscreen objects
 def removesObjects(app):
-    for projectile in app.projectileList:
+    projectileDict = app.projectileDict.copy()
+    for projectile in projectileDict:
         # remove player projectiles that move off screen
-        if projectile[1] < -10:
-            app.projectileList.remove(projectile)
+        if projectileDict[projectile][1] < -10:
+            app.projectileDict.pop(projectile)
 
     enemyDict = app.enemyDict.copy()
     for enemy in enemyDict:
@@ -259,8 +279,8 @@ def onStep(app):
             moveEnemies(app)
 
             # spawns player projectiles
-            if app.spawnCounter % app.bullet.duration == 0:
-                app.projectileList.append([app.player.x, app.player.y - app.player.size])
+            if app.spawnCounter % 4 == 0:
+                spawnProjectiles(app)
             
             movePlayerProjectiles(app)
 
@@ -303,8 +323,8 @@ def onKeyHold(app, keys):
                 app.enemyDict[enemy][0] -= 15
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][0] -= 15
-            for projectile in app.projectileList:
-                projectile[0] -= 15
+            for projectile in app.projectileDict:
+                app.projectileDict[projectile][0] -= 15
             
             # moves background
             app.backgroundImageX -= 15
@@ -316,8 +336,8 @@ def onKeyHold(app, keys):
                 app.enemyDict[enemy][0] += 15
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][0] += 15
-            for projectile in app.projectileList:
-                projectile[0] += 15
+            for projectile in app.projectileDict:
+                app.projectileDict[projectile][0] += 15
 
             app.backgroundImageX += 15
             if app.backgroundImageX == app.backgroundImageWidth:
@@ -328,8 +348,8 @@ def onKeyHold(app, keys):
                 app.enemyDict[enemy][1] += 15
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][1] += 15
-            for projectile in app.projectileList:
-                projectile[1] += 15
+            for projectile in app.projectileDict:
+                app.projectileDict[projectile][1] += 15
             
             # keeps track for shadow and score line
             app.shadowCounter -= 10
@@ -345,8 +365,8 @@ def onKeyHold(app, keys):
                 app.enemyDict[enemy][1] -= 15
             for obstacle in app.obstacleDict:
                 app.obstacleDict[obstacle][1] -= 15
-            for projectile in app.projectileList:
-                projectile[1] -= 15
+            for projectile in app.projectileDict:
+                app.projectileDict[projectile][1] -= 15
             
             app.shadowCounter += 10
             app.forwardCounter -= 10
@@ -373,8 +393,8 @@ def drawObstacle(app):
                  obstacle.size, obstacle.size, fill = 'green')
 
 def drawProjectile(app):
-    for dx, dy in app.projectileList:
-        drawCircle(dx, dy, app.bullet.size, fill = 'orange')
+    for projectile in app.projectileDict:
+        drawCircle(app.projectileDict[projectile][0], app.projectileDict[projectile][1], projectile.size, fill = 'orange')
 
 def drawShadow(app):
     if app.shadowCounter > 0:
