@@ -14,11 +14,12 @@ class Player:
 class Enemy:
     nextId = 0
 
-    def __init__(self, health, size, direction, follow):
+    def __init__(self, health, size, direction, follow, shoot):
         self.health = health
         self.size = size
         self.direction = direction
         self.follow = follow
+        self.shoot = shoot
         self.id = Enemy.nextId
         Enemy.nextId += 1
     
@@ -133,11 +134,14 @@ def createNewEnemies(app):
     directions = [(1, 0), (-1, 0), (0, 1), (0, 1)]
     # 30% chance of special enemy spawning
     num = random.randint(1, 10)
+    shoot = False
     if num <= 7:
         follow = False
     else:
         follow = True
-    newEnemy = Enemy(1, 15, random.choice(directions), follow)
+        if num == 10:
+            shoot = True
+    newEnemy = Enemy(1, 15, random.choice(directions), follow, shoot)
     return newEnemy
 
 def createNewObstacles(app):
@@ -165,6 +169,12 @@ def moveEnemies(app):
 def movePlayerProjectiles(app):
     for projectile in app.projectileList:
         projectile[1] -= 30
+
+def moveEnemyProjectiles(app):
+    # for enemy in app.enemyDict:
+    #     if enemy.shoot == True:
+    #         app.projectileList.append(app.enemyDict[enemy][0] - enemy.size, app.enemyDict[1] - enemy.size)
+    pass
 
 def crossScoreLine(app):
     if app.forwardCounter == app.nextScoreLine:
