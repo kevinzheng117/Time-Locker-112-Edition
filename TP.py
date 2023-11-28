@@ -37,11 +37,10 @@ class Enemy:
 class Projectile:
     nextId = 0
 
-    def __init__(self, size, damage, direction, owner):
+    def __init__(self, size, damage, direction):
         self.size = size
         self.damage = damage
         self.direction = direction
-        self.owner
         self.id = Projectile.nextId
         Projectile.nextId += 1
     
@@ -184,6 +183,7 @@ def createNewObstacles(app):
     return newObstacle
 
 # uses 2D unit vector to determine player direction
+# source: https://www.youtube.com/watch?app=desktop&v=f5DHYCKyVRo
 def moveToPlayer(app, enemy):
     directionX = app.enemyDict[enemy][0] - app.player.x
     directionY = app.enemyDict[enemy][1] - app.player.y
