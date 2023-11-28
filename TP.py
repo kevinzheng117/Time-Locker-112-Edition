@@ -37,10 +37,11 @@ class Enemy:
 class Projectile:
     nextId = 0
 
-    def __init__(self, size, damage, direction):
+    def __init__(self, size, damage, direction, owner):
         self.size = size
         self.damage = damage
         self.direction = direction
+        self.owner
         self.id = Projectile.nextId
         Projectile.nextId += 1
     
@@ -83,8 +84,7 @@ def newGame(app):
     source: https://images.fineartamerica.com/images/artworkimages/mediumlarge
     /3/pixel-art-of-80s-retro-sci-fi-background-herbert.jpg
     '''
-    app.backgroundImage = Image.open(
-        r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\background image.jpg")
+    app.backgroundImage = Image.open("Images/background image.jpg")
     app.backgroundImageWidth = app.backgroundImage.width
     app.backgroundImageHeight =  app.backgroundImage.height
     app.backgroundImage = CMUImage(app.backgroundImage)
@@ -95,8 +95,7 @@ def newGame(app):
     but slowed down program significantly
     '''
     # source: https://i.pinimg.com/550x/20/84/42/208442642ff691ac20846b9376db3830.jpg
-    app.obstacleImage = Image.open(
-        r"C:\Users\zheng\OneDrive\Documents\CMU\F23\15112\TP\Images\obstacle.jpg")
+    app.obstacleImage = Image.open("Images/obstacle.jpg")
     app.obstacleImageWidth = app.obstacleImage.width
     app.obstacleImageHeight = app.obstacleImage.height
 
@@ -108,7 +107,6 @@ def playerEnemyProjectileCollison(app):
     # bug needs fixing, not sure why
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
-    print(app.projectileDict)
     for enemy in enemyDict:
         for projectile in projectileDict:
             if ((distance(app.player.x, app.player.y, projectileDict[projectile][0], projectileDict[projectile][1]) 
