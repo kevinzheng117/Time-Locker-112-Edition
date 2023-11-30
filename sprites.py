@@ -1,6 +1,7 @@
 from cmu_graphics import *
 from PIL import Image
 import os, pathlib
+import math
 
 def onAppStart(app):    
     # source: https://openclipart.org/detail/215080/retro-character-sprite-sheet
@@ -32,6 +33,19 @@ def onStep(app):
 # 2. Check if the distance between angle center and selected line segment (which will be in a dict mapped to a range of angles)
 # is less than circle's radius
 # DONE!
+
+# vector calculation using dot product
+# source: https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
+def angleCalc(p1, p2, p3):
+    # p1 is center point
+    vectorA = (p1[0] - p2[0], p1[1] - p2[1])
+    vectorB = (p1[0] - p3[0], p1[1] - p3[1])
+    # angle in radians
+    angle = math.acos((vectorA[0] * vectorB[0] + vectorA[1] * vectorB[1]) / 
+    (math.sqrt(vectorA[0] ** 2 + vectorA[1] ** 2) * math.sqrt(vectorB[0] ** 2 + vectorB[1] ** 2)))
+    # convert to degrees
+    angle *= 180 / math.pi
+    return angle
 
 def drawPlayerBox(app):
     for i in range(len(app.coordinates)):
