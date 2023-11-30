@@ -20,7 +20,9 @@ def onAppStart(app):
     # we should currently display
     app.playerSpriteCounter = 0
     app.stepsPerSecond = 1
-    app.coordinates = [[105, 23], [27, 105], [27, 280], [0, 300], [0, 390], [70, 490], [315, 490], [385, 380], [385, 300], [358, 280], [358, 23], [105, 23]]
+    app.coordinates = [[105, 23], [27, 105], [27, 280], [0, 300], [0, 390], [70, 490], [315, 490], [385, 390], [385, 300], [358, 280], [358, 23], [105, 23]]
+    # angles measured with Geogebra graphing calculator
+    app.angles = [(0, 28.3), (28.3, 81.3), (81.3, 84.5), (84.5, 107), (107, 132.6), (132.6, 185.7), (185.7, 212.2), (212.2, 232.7), (232.7, 237.2), (237.2, 301.7), (301.7, 360)]
 
 def onStep(app):
     app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
@@ -40,7 +42,8 @@ def drawPlayerBox(app):
 def redrawAll(app):
     sprite = app.playerSprites[app.playerSpriteCounter]
     drawPlayerBox(app)
-    drawImage(sprite, 0, 0)
+    # drawImage(sprite, 0, 0)
+    drawCircle(191.5, 245, 5)
 
 def main():
     runApp(width=600, height=600)
