@@ -20,22 +20,22 @@ def onAppStart(app):
     # we should currently display
     app.playerSpriteCounter = 0
     app.stepsPerSecond = 1
+    app.coordinates = [[105, 23], [27, 105], [27, 280], [0, 300], [0, 390], [70, 490], [315, 490], [385, 380], [385, 300], [358, 280], [358, 23], [105, 23]]
 
 def onStep(app):
     app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
 
+# rationale for irregular circle intersection:
+# 1. determine angle of circle center relative to irregular polygon center (300, 300)
+# 2. Check if the distance between angle center and selected line segment (which will be in a dict mapped to a range of angles)
+# is less than circle's radius
+# DONE!
+
 def drawPlayerBox(app):
-    drawLine(105, 23, 358, 23)
-    drawLine(105, 23, 27, 105)
-    drawLine(27, 105, 27, 280)
-    drawLine(27, 280, 0, 300)
-    drawLine(0, 300, 0, 390)
-    drawLine(0, 390, 70, 490)
-    drawLine(70, 490, 315, 490)
-    drawLine(315, 490, 385, 380)
-    drawLine(385, 380, 385, 300)
-    drawLine(385, 300, 358, 280)
-    drawLine(358, 23, 358, 280)
+    for i in range(len(app.coordinates)):
+        if i < len(app.coordinates) - 1:
+            drawLine(app.coordinates[i][0],app.coordinates[i][1],app.coordinates[i+1][0],app.coordinates[i+1][1])
+        
 
 def redrawAll(app):
     sprite = app.playerSprites[app.playerSpriteCounter]

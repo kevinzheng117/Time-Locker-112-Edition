@@ -102,12 +102,16 @@ def newGame(app):
     playerSpritestrip = Image.open('Images/player sprite.png')
     newWidth, newHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height*10 // 98)
     playerSpritestrip = playerSpritestrip.resize((newWidth, newHeight))
-    
+    app.playerScaleFactor = 9.8
+
     app.playerSprites = [ ]
     for i in range(4):
         # Split up the spritestrip into its separate sprites
         # then save them in a list
-        sprite = CMUImage(playerSpritestrip.crop((383 * i//9.8, 1510//9.8, (383 + 383 * i)//9.8, 2000//9.8)))
+        sprite = CMUImage(playerSpritestrip.crop((383 * i/app.playerScaleFactor, 
+                                                1510/app.playerScaleFactor,
+                                                (383 + 383 * i)/app.playerScaleFactor,
+                                                2000/app.playerScaleFactor)))
         app.playerSprites.append(sprite)
         
     # app.spriteCounter shows which sprite (of the list) 
@@ -443,7 +447,7 @@ def onKeyHold(app, keys):
                 app.backgroundImageY = 0
     if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
         if app.stepsPerSecond < 50:
-            app.stepsPerSecond += 1
+            app.stepsPerSecond += 2
 
 # move drawEnemy and drawProjectile into their classes
 def drawEnemy(app):
@@ -501,6 +505,19 @@ def drawPlayer(app):
     sprite = app.playerSprites[app.playerSpriteCounter]
     drawImage(sprite, 280.5, 275)
 
+def drawPlayerBox(app):
+    drawLine(105, 23, 358, 23)
+    drawLine(105, 23, 27, 105)
+    drawLine(27, 105, 27, 280)
+    drawLine(27, 280, 0, 300)
+    drawLine(0, 300, 0, 390)
+    drawLine(0, 390, 70, 490)
+    drawLine(70, 490, 315, 490)
+    drawLine(315, 490, 385, 380)
+    drawLine(385, 380, 385, 300)
+    drawLine(385, 300, 358, 280)
+    drawLine(358, 23, 358, 280)
+
 def drawBackground(app):
     for i in range(-1, 2):
         for j in range(-1, 2):
@@ -512,6 +529,7 @@ def redrawAll(app):
         # want player and background to appear in the start menu
         drawBackground(app)
         drawPlayer(app)
+        drawPlayerBox(app)
         # draw start menu
         if app.startMenu == True:
             drawMenu(app)
