@@ -122,7 +122,7 @@ def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True and app.gameOver == False:
         # makes sure the player is not paused
-        if app.stepsPerSecond != 10:
+        if app.stepsPerSecond > 10:
             app.spawnCounter += 1
 
             # spawns enemies
@@ -143,7 +143,9 @@ def onStep(app):
             # spawns obstacles
             if app.spawnCounter % 30 == 0:
                 spawnObstacles(app)
-        
+
+            # move sprite
+            app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
         # shadow should have constant speed regardless of game time
         app.shadowCounter += 75 / app.stepsPerSecond 
 
@@ -159,8 +161,6 @@ def onStep(app):
         removesObjects(app)
 
         checkShadow(app)
-
-        app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
 
 def playerEnemyProjectileCollison(app):
     # bug needs fixing, not sure why
@@ -411,7 +411,7 @@ def onKeyHold(app, keys):
                 app.backgroundImageY = 0
     if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
         if app.stepsPerSecond < 50:
-            app.stepsPerSecond += 2
+            app.stepsPerSecond += 1
 
 # move drawEnemy and drawProjectile into their classes
 def drawEnemy(app):
