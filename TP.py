@@ -224,7 +224,9 @@ def playerObstacleCollison(app):
         checks if the shapes intersect and which side of the rectangle 
         the circle is on to prevent the user from moving farther from that side
         '''
-        if (distance(closestX, closestY, app.player.x, app.player.y) <= app.player.size):
+        # add 15 (how much everything else moves) so player
+        # cannot make the move that makes it intersect with the recatangle
+        if (distance(closestX, closestY, app.player.x, app.player.y) <= app.player.size + 15):
             if app.player.x > closestX:
                 return 'left'
             elif app.player.x < closestX:
