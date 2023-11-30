@@ -98,9 +98,69 @@ def newGame(app):
     app.obstacleImageWidth = app.obstacleImage.width
     app.obstacleImageHeight = app.obstacleImage.height
 
+    # source: https://openclipart.org/detail/215080/retro-character-sprite-sheet
+    playerSpritestrip = Image.open('Images/player sprite.png')
+    newWidth, newHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height*10 // 98)
+    playerSpritestrip = playerSpritestrip.resize((newWidth, newHeight))
+    
+    app.playerSprites = [ ]
+    for i in range(4):
+        # Split up the spritestrip into its separate sprites
+        # then save them in a list
+        sprite = CMUImage(playerSpritestrip.crop((383 * i//9.8, 1510//9.8, (383 + 383 * i)//9.8, 2000//9.8)))
+        app.playerSprites.append(sprite)
+        
+    # app.spriteCounter shows which sprite (of the list) 
+    # we should currently display
+    app.playerSpriteCounter = 0
+
 def onAppStart(app):
     app.highScore = 0
     newGame(app)
+
+def onStep(app):
+    # everything starts as paused since player hasn't moved
+    if app.startMenu != True and app.gameOver == False:
+        # makes sure the player is not paused
+        if app.stepsPerSecond != 10:
+            app.spawnCounter += 1
+
+            # spawns enemies
+            if app.spawnCounter % 5 == 0:
+                spawnEnemies(app)
+
+            moveEnemies(app)
+
+            # spawns player projectiles
+            if app.spawnCounter % 4 == 0:
+                spawnPlayerProjectiles(app)
+
+            if app.spawnCounter % 12 == 0:
+                spawnEnemyProjectiles(app)
+            
+            moveProjectiles(app)
+
+            # spawns obstacles
+            if app.spawnCounter % 30 == 0:
+                spawnObstacles(app)
+        
+        # shadow should have constant speed regardless of game time
+        app.shadowCounter += 75 / app.stepsPerSecond 
+
+        # checks for any collisons then removes the projectile and enemy
+        playerEnemyProjectileCollison(app)
+
+        projectileObstacleCollison(app)
+
+        crossScoreLine(app)
+
+        updateHighScore(app)
+
+        removesObjects(app)
+
+        checkShadow(app)
+
+        app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
 
 def playerEnemyProjectileCollison(app):
     # bug needs fixing, not sure why
@@ -277,48 +337,6 @@ def checkShadow(app):
     if app.shadowCounter >= app.player.y:
         app.gameOver = True
 
-def onStep(app):
-    # everything starts as paused since player hasn't moved
-    if app.startMenu != True and app.gameOver == False:
-        # makes sure the player is not paused
-        if app.stepsPerSecond != 10:
-            app.spawnCounter += 1
-
-            # spawns enemies
-            if app.spawnCounter % 5 == 0:
-                spawnEnemies(app)
-
-            moveEnemies(app)
-
-            # spawns player projectiles
-            if app.spawnCounter % 4 == 0:
-                spawnPlayerProjectiles(app)
-
-            if app.spawnCounter % 12 == 0:
-                spawnEnemyProjectiles(app)
-            
-            moveProjectiles(app)
-
-            # spawns obstacles
-            if app.spawnCounter % 30 == 0:
-                spawnObstacles(app)
-        
-        # shadow should have constant speed regardless of game time
-        app.shadowCounter += 75 / app.stepsPerSecond 
-
-        # checks for any collisons then removes the projectile and enemy
-        playerEnemyProjectileCollison(app)
-
-        projectileObstacleCollison(app)
-
-        crossScoreLine(app)
-
-        updateHighScore(app)
-
-        removesObjects(app)
-
-        checkShadow(app)
-
 def onKeyPress(app, key):
     if app.gameOver == True:
         if key != None:
@@ -447,7 +465,9 @@ def drawScoreLine(app):
         drawLabel('+10', 575, app.forwardCounter % 2000, size = 12, fill = 'white')
 
 def drawPlayer(app):
-    drawCircle(app.player.x, app.player.y, app.player.size, fill = 'blue')
+    drawCircle(app.player.x, app.player.y, app.player.size, fill = None, border = 'black')
+    sprite = app.playerSprites[app.playerSpriteCounter]
+    drawImage(sprite, 280.5, 275)
 
 def drawBackground(app):
     for i in range(-1, 2):

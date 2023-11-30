@@ -2,31 +2,33 @@ from cmu_graphics import *
 from PIL import Image
 import os, pathlib
 
-def onAppStart(app):
+def onAppStart(app):    
+    # source: https://openclipart.org/detail/215080/retro-character-sprite-sheet
+    playerSpritestrip = Image.open('Images/player sprite.png')
+    newWidth, newHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height*10 // 98)
+    playerSpritestrip = playerSpritestrip.resize((newWidth, newHeight))
     
-    spritestrip = Image.open('Images/characterstripe.png')
-    
-    app.sprites = [ ]
-    for i in range(6):
+    app.playerSprites = [ ]
+    for i in range(4):
         # Split up the spritestrip into its separate sprites
         # then save them in a list
-        sprite = CMUImage(spritestrip.crop((30+260*i, 30, 230+260*i, 250)))
-        app.sprites.append(sprite)
+        sprite = CMUImage(playerSpritestrip.crop((383 * i//9.8, 1510//9.8, (383 + 383 * i)//9.8, 2000//9.8)))
+        app.playerSprites.append(sprite)
         
     # app.spriteCounter shows which sprite (of the list) 
     # we should currently display
-    app.spriteCounter = 0
-    app.stepsPerSecond = 10
+    app.playerSpriteCounter = 0
+    app.stepsPerSecond = 5
 
 def onStep(app):
-    app.spriteCounter = (1 + app.spriteCounter) % len(app.sprites)
+    app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
 
 def redrawAll(app):
-    sprite = app.sprites[app.spriteCounter]
-    drawImage(sprite,200, 200)
+    sprite = app.playerSprites[app.playerSpriteCounter]
+    drawImage(sprite, 280.5, 275)
 
 def main():
-    runApp(width=400, height=400)
+    runApp(width=600, height=600)
 
 if __name__ == '__main__':
     main()
