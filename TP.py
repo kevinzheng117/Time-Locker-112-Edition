@@ -150,6 +150,8 @@ def onStep(app):
         app.shadowCounter += 75 / app.stepsPerSecond 
 
         # checks for any collisons then removes the projectile and enemy
+        enemyProjectileCollison(app)
+
         playerEnemyProjectileCollison(app)
 
         projectileObstacleCollison(app)
@@ -162,19 +164,13 @@ def onStep(app):
 
         checkShadow(app)
 
-def playerEnemyProjectileCollison(app):
+def enemyProjectileCollison(app):
     # bug needs fixing, not sure why
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
     for enemy in enemyDict:
         for projectile in projectileDict:
-            if ((distance(app.player.x, app.player.y, projectileDict[projectile][0], projectileDict[projectile][1]) 
-                <= app.player.size + projectile.size) or
-                (distance(app.player.x, app.player.y, enemyDict[enemy][0], enemyDict[enemy][1])
-                <= app.player.size + enemy.size)):
-                app.gameOver = True
-                
-            elif (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectileDict[projectile][0], projectileDict[projectile][1]) 
+            if (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectileDict[projectile][0], projectileDict[projectile][1]) 
                 <= enemy.size + projectile.size):
                 enemy.health -= projectile.damage
                 if enemy.health == 0:
@@ -186,6 +182,18 @@ def playerEnemyProjectileCollison(app):
                     else:
                         app.score += 1
                 app.projectileDict.pop(projectile)
+
+# new function for integrating irregular polygon
+def playerEnemyProjectileCollison(app):
+    enemyDict = app.enemyDict.copy()
+    projectileDict = app.projectileDict.copy()
+    for enemy in enemyDict:
+        for projectile in projectileDict:
+            if ((distance(app.player.x, app.player.y, projectileDict[projectile][0], projectileDict[projectile][1]) 
+                <= app.player.size + projectile.size) or
+                (distance(app.player.x, app.player.y, enemyDict[enemy][0], enemyDict[enemy][1])
+                <= app.player.size + enemy.size)):
+                app.gameOver = True
     
 def projectileObstacleCollison(app):
      # not perfect since circle can be in square
@@ -193,10 +201,18 @@ def projectileObstacleCollison(app):
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
         for projectile in projectileDict:
-            closestX = max(obstacleDict[obstacle][0], 
-                           min(projectileDict[projectile][0], obstacleDict[obstacle][0] + obstacle.size))
-            closestY = max(obstacleDict[obstacle][1], 
-                           min(projectileDict[projectile][1], obstacleDict[obstacle][1] + obstacle.size))                
+            closestX = projectileDict[projectile][0]
+            closestY = projectileDict[projectile][1]
+
+            if closestX < obstacleDict[obstacle][0]:
+                closestX = obstacleDict[obstacle][0]
+            elif closestX > obstacleDict[obstacle][0] + obstacle.size:
+                closestX = obstacleDict[obstacle][0] + obstacle.size
+            if closestY < obstacleDict[obstacle][1]:
+                closestY = obstacleDict[obstacle][1]
+            elif closestY > obstacleDict[obstacle][1] + obstacle.size:
+                closestY = obstacleDict[obstacle][1] + obstacle.size
+
             if (distance(closestX, closestY, projectileDict[projectile][0], projectileDict[projectile][1]) <= projectile.size):
                 obstacle.health -= projectile.damage
                 if obstacle.health == 0:
@@ -211,13 +227,13 @@ def playerObstacleCollison(app):
         closestX = app.player.x
         closestY = app.player.y
 
-        if app.player.x < obstacleDict[obstacle][0]:
+        if closestX < obstacleDict[obstacle][0]:
             closestX = obstacleDict[obstacle][0]
-        elif app.player.x > obstacleDict[obstacle][0] + obstacle.size:
+        elif closestX > obstacleDict[obstacle][0] + obstacle.size:
             closestX = obstacleDict[obstacle][0] + obstacle.size
-        if app.player.y < obstacleDict[obstacle][1]:
+        if closestY < obstacleDict[obstacle][1]:
             closestY = obstacleDict[obstacle][1]
-        elif app.player.y > obstacleDict[obstacle][1] + obstacle.size:
+        elif closestY > obstacleDict[obstacle][1] + obstacle.size:
             closestY = obstacleDict[obstacle][1] + obstacle.size
         
         ''' 
@@ -259,6 +275,7 @@ def createNewObstacles(app):
 
 # uses 2D unit vector to determine player direction
 # source: https://www.youtube.com/watch?app=desktop&v=f5DHYCKyVRo
+# utilized new algorithm but still buggy
 def moveToPlayer(app, enemy):
     directionX = app.enemyDict[enemy][0] - app.player.x
     directionY = app.enemyDict[enemy][1] - app.player.y

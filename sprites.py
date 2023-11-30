@@ -5,6 +5,7 @@ import os, pathlib
 def onAppStart(app):    
     # source: https://openclipart.org/detail/215080/retro-character-sprite-sheet
     playerSpritestrip = Image.open('Images/player sprite.png')
+    # resize to actual size used in game
     newWidth, newHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height*10 // 98)
     # playerSpritestrip = playerSpritestrip.resize((newWidth, newHeight))
     
