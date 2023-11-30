@@ -204,13 +204,26 @@ def projectileObstacleCollison(app):
                 app.projectileDict.pop(projectile)
 
 # square circle collison
+# source: https://www.jeffreythompson.org/collision-detection/circle-rect.php
 def playerObstacleCollison(app):
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
-        closestX = max(obstacleDict[obstacle][0], 
-                        min(app.player.x, obstacleDict[obstacle][0] + obstacle.size))
-        closestY = max(obstacleDict[obstacle][1], 
-                        min(app.player.y, obstacleDict[obstacle][1] + obstacle.size))
+        closestX = app.player.x
+        closestY = app.player.y
+
+        if app.player.x < obstacleDict[obstacle][0]:
+            closestX = obstacleDict[obstacle][0]
+        elif app.player.x > obstacleDict[obstacle][0] + obstacle.size:
+            closestX = obstacleDict[obstacle][0] + obstacle.size
+        if app.player.y < obstacleDict[obstacle][1]:
+            closestY = obstacleDict[obstacle][1]
+        elif app.player.y > obstacleDict[obstacle][1] + obstacle.size:
+            closestY = obstacleDict[obstacle][1] + obstacle.size
+        
+        ''' 
+        checks if the shapes intersect and which side of the rectangle 
+        the circle is on to prevent the user from moving farther from that side
+        '''
         if (distance(closestX, closestY, app.player.x, app.player.y) <= app.player.size):
             if app.player.x > closestX:
                 return 'left'
