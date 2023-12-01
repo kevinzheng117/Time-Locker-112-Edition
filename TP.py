@@ -334,8 +334,7 @@ def playerObstacleCollision(app):
                 # distance from the center of the square towards the direction of player center
                 if distancePointToLine(lineSegment, obstacleCenter) <= radius:
                     print(True)
-
-    
+                    
 # circle-rectangle collison
 # source: https://www.jeffreythompson.org/collision-detection/circle-rect.php
 def projectileObstacleCollision(app):
