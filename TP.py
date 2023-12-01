@@ -143,7 +143,8 @@ def onStep(app):
 
             # spawns enemies
             if app.spawnCounter % 5 == 0:
-                spawnEnemies(app)
+                # spawnEnemies(app)
+                pass
 
             moveEnemies(app)
 
@@ -165,12 +166,14 @@ def onStep(app):
         # shadow should have constant speed regardless of game time
         app.shadowCounter += 75 / app.stepsPerSecond 
 
-        # checks for any collisons then removes the projectile and enemy
-        enemyProjectileCollison(app)
+        # checks for any collisions then removes the projectile and enemy
+        enemyProjectileCollision(app)
 
-        playerCollison(app)
+        playerEnemyProjectileCollision(app)
+        
+        playerObstacleCollision(app)
 
-        projectileObstacleCollison(app)
+        projectileObstacleCollision(app)
 
         crossScoreLine(app)
 
@@ -178,9 +181,9 @@ def onStep(app):
 
         removesObjects(app)
 
-        checkShadow(app)
+        # checkShadow(app)
 
-def enemyProjectileCollison(app):
+def enemyProjectileCollision(app):
     # bug needs fixing, not sure why
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
@@ -203,14 +206,6 @@ def enemyProjectileCollison(app):
 # source: https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
 # only returns 0 to 180 degrees since it's calculating the angle between 2 vectors
 def angleCalc(app, p1, p2, p3):
-    p180 = [288, 490]
-
-    # same kind of adjustments as app.coordinates
-    p180[0] //= app.playerScaleFactor
-    p180[1] // app.playerScaleFactor
-    p180[0] += 280
-    p180[1] += 275
-
     # p1 is center point, p2 is first point in app.coordinates
     vectorA = (p1[0] - p2[0], p1[1] - p2[1])
     vectorB = (p1[0] - p3[0], p1[1] - p3[1])
@@ -221,14 +216,6 @@ def angleCalc(app, p1, p2, p3):
 
     # convert to degrees
     angle *= 180 / math.pi
-
-    # calculated exact point on irregular polygon where angle is 180 with desmos
-    ''' 
-    basically points to the right side of the line formed by the 180 degrees point and p1
-    will have their angles changed to 180 to 360 degrees
-    '''
-    if p3[0] >= p180[0] or p3[0] >= p2[0] and p3[1] <= p2[1]:
-        angle = 360 - angle
     return angle
 
 # uses point-line distance formula
@@ -242,17 +229,35 @@ def distancePointToLine(line, point):
 
 '''
 rationale for irregular polygon-circle intersection:
-1. determine angle of circle center relative to irregular polygon center (300, 300)
+1. determine angle of circle center relative to irregular polygon center
 2. Check if the distance between angle center and selected line segment
 is less than circle's radius
 '''
-def playerCollison(app):
+def playerEnemyProjectileCollision(app):
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
-    
+
+    # to adjust for the fact that we said the first coordinate in our list is 0 degrees
+    # calculated exact point on irregular polygon where angle is 180 with desmos
+    p180 = [288, 490]
+    # same kind of adjustments as app.coordinates
+    p180[0] //= app.playerScaleFactor
+    p180[1] // app.playerScaleFactor
+    p180[0] += 280
+    p180[1] += 275
+
     for enemy in enemyDict:
         for i in range(len(app.angles)):
             angle = angleCalc(app, (app.player.x, app.player.y), app.coordinates[0], enemyDict[enemy])
+            ''' 
+            basically points to the right side of the line formed by the 180 degrees 
+            point and p1 will have their angles changed to 180 to 360 degrees
+            '''
+            if (enemyDict[enemy][0] >= p180[0] or 
+                enemyDict[enemy][0] >= app.coordinates[0][0] and 
+                enemyDict[enemy][1] <= app.coordinates[0][1]):
+                angle = 360 - angle
+
             if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
                 lineSegment = (app.coordinates[i], app.coordinates[i + 1])
                 if distancePointToLine(lineSegment, enemyDict[enemy]) <= enemy.size:
@@ -261,12 +266,79 @@ def playerCollison(app):
     for projectile in projectileDict:
         for i in range(len(app.angles)):
             angle = angleCalc(app, (app.player.x, app.player.y), app.coordinates[0], projectileDict[projectile])
+            if (projectileDict[projectile][0] >= p180[0] or 
+                projectileDict[projectile][0] >= app.coordinates[0][0] and 
+                projectileDict[projectile][1] <= app.coordinates[0][1]):
+                angle = 360 - angle
+
             if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
                 lineSegment = (app.coordinates[i], app.coordinates[i + 1])
                 if distancePointToLine(lineSegment, projectileDict[projectile]) <= projectile.size:
                     app.gameOver = True
+
+'''
+rationale for irregular polygon-rectangle intersection:
+similar to irregular polygon-square intersection except radius changes based on
+the angel
+'''
+# source: https://math.stackexchange.com/questions/924272/find-multiple-of-radius-of-square-given-angle-of-line
+def playerObstacleCollision(app):
+    obstacleDict = app.obstacleDict.copy()
+
+    # to adjust for the fact that we said the first coordinate in our list is 0 degrees
+    # calculated exact point on irregular polygon where angle is 180 with desmos
+    p180 = [288, 490]
+    # same kind of adjustments as app.coordinates
+    p180[0] //= app.playerScaleFactor
+    p180[1] // app.playerScaleFactor
+    p180[0] += 280
+    p180[1] += 275
+
+    for obstacle in obstacleDict:
+        obstacleCenter = (obstacleDict[obstacle][0] + obstacle.size / 2, 
+                          obstacleDict[obstacle][1] + obstacle.size / 2)
+        obstacle0Point = (obstacleDict[obstacle][0] + obstacle.size, obstacleDict[obstacle][1] + obstacle.size / 2) 
+        for i in range(len(app.angles)):
+            angle = angleCalc(app, (app.player.x, app.player.y), app.coordinates[0], obstacleCenter)
+            ''' 
+            basically points to the right side of the line formed by the 180 degrees 
+            point and p1 will have their angles changed to 180 to 360 degrees
+            '''
+            if (obstacleCenter[0] >= p180[0] or 
+                obstacleCenter[0] >= app.coordinates[0][0] and 
+                obstacleCenter[1] <= app.coordinates[0][1]):
+                angle = 360 - angle
+
+            if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
+                lineSegment = (app.coordinates[i], app.coordinates[i + 1])
+                angleR = angleCalc(app, obstacleCenter, (app.player.x, app.player.y), obstacle0Point)
+
+                # adjusts angles past 180 degrees
+                if app.player.y >= obstacleCenter[1]:
+                    angleR = 360 - angleR
+
+                # algorithm only works for angles in between -45 and 45
+                while angleR >= 45:
+                    angleR -= 90
+
+                # python has no built in secant or cosecant function
+                if almostEqual(0, angleR):
+                    radius = obstacle.size / 2
+                else:
+                    angleR *= math.pi/180
+                    # python trig function takes in radians
+                    sec = 1/math.cos(angleR)
+                    csc = 1/math.sin(angleR)
+                    radius = obstacle.size / 2 * min(abs(sec), abs(csc))
+            
+                # distance from the center of the square towards the direction of player center
+                if distancePointToLine(lineSegment, obstacleCenter) <= radius:
+                    print(True)
+
     
-def projectileObstacleCollison(app):
+# circle-rectangle collison
+# source: https://www.jeffreythompson.org/collision-detection/circle-rect.php
+def projectileObstacleCollision(app):
     projectileDict = app.projectileDict.copy()
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
@@ -289,43 +361,6 @@ def projectileObstacleCollison(app):
                     app.obstacleDict.pop(obstacle)
                 app.projectileDict.pop(projectile)
 
-# irregular polygon sqaure collison
-# source: https://www.jeffreythompson.org/collision-detection/circle-rect.php
-def playerObstacleCollison(app):
-    obstacleDict = app.obstacleDict.copy()
-    for obstacle in obstacleDict:
-        closestX = app.player.x
-        closestY = app.player.y
-
-        if closestX < obstacleDict[obstacle][0]:
-            closestX = obstacleDict[obstacle][0]
-        elif closestX > obstacleDict[obstacle][0] + obstacle.size:
-            closestX = obstacleDict[obstacle][0] + obstacle.size
-        if closestY < obstacleDict[obstacle][1]:
-            closestY = obstacleDict[obstacle][1]
-        elif closestY > obstacleDict[obstacle][1] + obstacle.size:
-            closestY = obstacleDict[obstacle][1] + obstacle.size
-        
-        ''' 
-        checks if the shapes intersect and which side of the rectangle 
-        the circle is on to prevent the user from moving farther from that side
-        '''
-        '''
-        add 15 (how much everything else moves) so player
-        cannot make the move that makes it intersect with the recatangle
-        '''
-        if (distance(closestX, closestY, app.player.x, app.player.y) <= app.player.size + 15):
-            if app.player.x > closestX:
-                return 'left'
-            elif app.player.x < closestX:
-                return 'right'
-            elif app.player.y > closestY:
-                return 'up'
-            elif app.player.y < closestY:
-                return 'down'
-            else:
-                return None
-                
 def createNewEnemies(app):
     # twice as likely to spawn enemies that move down
     directions = [(1, 0), (-1, 0), (0, 1), (0, 1)]
@@ -455,8 +490,7 @@ def onKeyRelease(app, key):
         app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):   
-    if ('right' in keys and playerObstacleCollison(app) != 'right' and
-        app.gameOver == False and app.startMenu == False):
+    if ('right' in keys and app.gameOver == False and app.startMenu == False):
             # moves enemies, obstacles, projectiles
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] -= 15
@@ -469,8 +503,8 @@ def onKeyHold(app, keys):
             app.backgroundImageX -= 15
             if app.backgroundImageX == -app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif ('left' in keys and playerObstacleCollison(app) != 'left' and 
-          app.gameOver == False and app.startMenu == False):
+    elif ('left' in keys and playerObstacleCollision(app) != 'left'
+          and app.gameOver == False and app.startMenu == False):
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] += 15
             for obstacle in app.obstacleDict:
@@ -481,8 +515,7 @@ def onKeyHold(app, keys):
             app.backgroundImageX += 15
             if app.backgroundImageX == app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif ('up' in keys and playerObstacleCollison(app) != 'up' 
-          and app.gameOver == False and app.startMenu == False):
+    elif ('up' in keys and app.gameOver == False and app.startMenu == False):
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] += 15
             for obstacle in app.obstacleDict:
@@ -498,8 +531,7 @@ def onKeyHold(app, keys):
             app.backgroundImageY += 15
             if app.backgroundImageY == app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    elif ('down' in keys and playerObstacleCollison(app) != 'down' and 
-          app.gameOver == False and app.startMenu == False):
+    elif ('down' in keys and app.gameOver == False and app.startMenu == False):
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] -= 15
             for obstacle in app.obstacleDict:
@@ -598,7 +630,7 @@ def redrawAll(app):
             drawEnemy(app)
             drawProjectile(app)
             drawObstacle(app)
-            drawShadow(app)
+            # drawShadow(app)
             drawScoreLine(app)
         
     else:
