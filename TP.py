@@ -138,7 +138,7 @@ def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True and app.gameOver == False:
         # makes sure the player is not paused
-        if app.stepsPerSecond > 10:
+        if app.stepsPerSecond != 10:
             app.spawnCounter += 1
 
             # spawns enemies, moreso as time moves on
@@ -155,7 +155,7 @@ def onStep(app):
             if app.spawnCounter % 4 == 0:
                 spawnPlayerProjectiles(app)
 
-            if app.spawnCounter % 12 == 0:
+            if app.spawnCounter % 15 == 0:
                 spawnEnemyProjectiles(app)
             
             moveProjectiles(app)
@@ -171,7 +171,7 @@ def onStep(app):
             # move sprite
             app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
         # shadow should have constant speed regardless of game time
-        app.shadowCounter += 75 / app.stepsPerSecond 
+        app.shadowCounter += 50 / app.stepsPerSecond 
 
         # checks for any collisions then removes the projectile and enemy
         enemyProjectileCollision(app)
