@@ -106,17 +106,29 @@ def newGame(app):
 
     app.playerSprites = [ ]
     for i in range(4):
-        # Split up the spritestrip into its separate sprites
-        # then save them in a list
         sprite = CMUImage(playerSpritestrip.crop((383 * i/app.playerScaleFactor, 
                                                 1510/app.playerScaleFactor,
                                                 (383 + 383 * i)/app.playerScaleFactor,
                                                 2000/app.playerScaleFactor)))
         app.playerSprites.append(sprite)
-        
-    # app.spriteCounter shows which sprite (of the list) 
-    # we should currently display
+
     app.playerSpriteCounter = 0
+
+    # coordinates to irregular polygon; written in a separate file so dimensions are different
+    app.coordinates = [[105, 23], [27, 105], [27, 280], [0, 300], [0, 390], 
+                       [70, 490], [315, 490], [385, 390], [385, 300], [358, 280], 
+                       [358, 23], [105, 23]]
+    for coordinate in app.coordinates:
+        coordinate[0] /= app.playerScaleFactor
+        coordinate[1] /= app.playerScaleFactor
+        # to adjust the coordinates to be at the center of the canvas
+        coordinate[0] += 280
+        coordinate[1] += 275
+
+    # angles measured using Geogebra graphing calculator
+    app.angles = [(0, 28.3), (28.3, 81.3), (81.3, 84.5), (84.5, 107), 
+                  (107, 132.6), (132.6, 185.7), (185.7, 212.2), (212.2, 232.7), 
+                  (232.7, 237.2), (237.2, 301.7), (301.7, 360)]
 
 def onAppStart(app):
     app.highScore = 0
@@ -156,7 +168,7 @@ def onStep(app):
         # checks for any collisons then removes the projectile and enemy
         enemyProjectileCollison(app)
 
-        playerEnemyProjectileCollison(app)
+        playerCollison(app)
 
         projectileObstacleCollison(app)
 
@@ -187,8 +199,65 @@ def enemyProjectileCollison(app):
                         app.score += 1
                 app.projectileDict.pop(projectile)
 
-# new function for integrating irregular polygon
-def playerEnemyProjectileCollison(app):
+# vector calculation using dot product
+# source: https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
+# only returns 0 to 180 degrees since it's calculating the angle between 2 vectors
+def angleCalc(app, p1, p2, p3):
+    p180 = [288, 490]
+
+    # same kind of adjustments as app.coordinates
+    p180[0] //= app.playerScaleFactor
+    p180[1] // app.playerScaleFactor
+    p180[0] += 280
+    p180[1] += 275
+
+    # p1 is center point, p2 is first point in app.coordinates
+    vectorA = (p1[0] - p2[0], p1[1] - p2[1])
+    vectorB = (p1[0] - p3[0], p1[1] - p3[1])
+
+    # angle in radians
+    angle = math.acos((vectorA[0] * vectorB[0] + vectorA[1] * vectorB[1]) / 
+    (math.sqrt(vectorA[0] ** 2 + vectorA[1] ** 2) * math.sqrt(vectorB[0] ** 2 + vectorB[1] ** 2)))
+
+    # convert to degrees
+    angle *= 180 / math.pi
+
+    # calculated exact point on irregular polygon where angle is 180 with desmos
+    # basically points to the right side of the line formed by the 180 degrees point and p1
+    # will have their angles changed to 180 to 360 degrees
+    if p3[0] >= p180[0] or p3[0] >= p2[0] and p3[1] <= p2[1]:
+        angle = 360 - angle
+    return angle
+
+# uses point-line distance formula
+# source: https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+def distancePointToLine(line, point):
+    p0 = point
+    p1 = line[0]
+    p2 = line[1]
+    d = abs((p2[0] - p1[0]) * (p1[1] - p0[1]) - (p1[0] - p0[0]) * (p2[1] - p1[1])) / distance(p1[0], p1[1], p2[0], p2[1]) 
+    return d
+
+# rationale for irregular circle intersection:
+# 1. determine angle of circle center relative to irregular polygon center (300, 300)
+# 2. Check if the distance between angle center and selected line segment
+# is less than circle's radius
+
+def playerCollison(app):
+    size = 25
+    projectile = (app.projectileX, app.projectileY)
+    center = (191.5, 245)
+    for i in range(len(app.angles)):
+        angle = angleCalc(center, app.coordinates[0], projectile)
+        if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
+            print(angle)
+            lineSegment = (app.coordinates[i], app.coordinates[i + 1])
+            if distancePointToLine(lineSegment, projectile) <= size:
+                return True
+    return False
+
+# move it to funciton above
+def playerCollison(app):
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
     for enemy in enemyDict:
@@ -501,22 +570,13 @@ def drawScoreLine(app):
         drawLabel('+10', 575, app.forwardCounter % 2000, size = 12, fill = 'white')
 
 def drawPlayer(app):
-    drawCircle(app.player.x, app.player.y, app.player.size, fill = None, border = 'black')
     sprite = app.playerSprites[app.playerSpriteCounter]
     drawImage(sprite, 280.5, 275)
 
 def drawPlayerBox(app):
-    drawLine(105, 23, 358, 23)
-    drawLine(105, 23, 27, 105)
-    drawLine(27, 105, 27, 280)
-    drawLine(27, 280, 0, 300)
-    drawLine(0, 300, 0, 390)
-    drawLine(0, 390, 70, 490)
-    drawLine(70, 490, 315, 490)
-    drawLine(315, 490, 385, 380)
-    drawLine(385, 380, 385, 300)
-    drawLine(385, 300, 358, 280)
-    drawLine(358, 23, 358, 280)
+    for i in range(len(app.coordinates)):
+        if i < len(app.coordinates) - 1:
+            drawLine(app.coordinates[i][0],app.coordinates[i][1],app.coordinates[i+1][0],app.coordinates[i+1][1], fill = 'white')
 
 def drawBackground(app):
     for i in range(-1, 2):
