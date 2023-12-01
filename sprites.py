@@ -30,15 +30,18 @@ def onAppStart(app):
 
     app.projectileX = 0
     app.projectileY = 0
+    app.obstacleX = 0
+    app.obstacleY = 0
     
 def onStep(app):
     app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
 
-# rationale for irregular circle intersection:
-# 1. determine angle of circle center relative to irregular polygon center (300, 300)
-# 2. Check if the distance between angle center and selected line segment
-# is less than circle's radius
-# DONE!
+'''
+rationale for irregular polygon-circle intersection:
+1. determine angle of circle center relative to irregular polygon center (300, 300)
+2. Check if the distance between angle center and selected line segment
+is less than circle's radius
+'''
 
 # vector calculation using dot product
 # source: https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
@@ -58,8 +61,10 @@ def angleCalc(p1, p2, p3):
     angle *= 180 / math.pi
 
     # calculated exact point on irregular polygon where angle is 180 with desmos
-    # basically points to the right side of the line formed by the 180 degrees point and p1
-    # will have their angles changed to 180 to 360 degrees
+    '''
+    basically points to the right side of the line formed by the 180 degrees point and p1
+    will have their angles changed to 180 to 360 degrees
+    '''
     if p3[0] >= p180[0] or p3[0] >= p2[0] and p3[1] <= p2[1]:
         angle = 360 - angle
     return angle
@@ -91,18 +96,40 @@ def playerProjectileEnemyCollison(app):
                 return True
     return False
 
+'''
+rationale for irregular polygon-rectangle intersection:
+1. determine angle of circle center relative to irregular polygon center (300, 300)
+2. Check if the distance between angle center and selected line segment
+is less than circle's radius
+'''
+def playerObstacleCollison(app):
+    size = 100
+    obstacle = (app.obstacleX + size/2, app.obstacleY + size/2)
+    center = (191.5, 245)
+    for i in range(len(app.angles)):
+        angle = angleCalc(center, app.coordinates[0], obstacle)
+        if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
+            print(angle)
+            lineSegment = (app.coordinates[i], app.coordinates[i + 1])
+            if distancePointToLine(lineSegment, obstacle) <= size:
+                return True
+    return False
+
+
 def onMousePress(app, mouseX, mouseY):
-    app.projectileX = mouseX
-    app.projectileY = mouseY
+    app.obstacleX = mouseX
+    app.obstacleY = mouseY
 
 def redrawAll(app):
     sprite = app.playerSprites[app.playerSpriteCounter]
     drawPlayerBox(app)
     # drawImage(sprite, 0, 0)
     drawCircle(191.5, 245, 5)
-    drawCircle(app.projectileX, app.projectileY, 25)
+    # drawCircle(app.projectileX, app.projectileY, 25)
+    drawRect(app.obstacleX, app.obstacleY, 100, 100)
     drawCircle(288, 490, 5)
-    print(playerProjectileEnemyCollison(app))
+    # print(playerProjectileEnemyCollison(app))
+    print(playerObstacleCollison(app))
 
 def main():
     runApp(width=600, height=600)

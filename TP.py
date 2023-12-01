@@ -223,8 +223,10 @@ def angleCalc(app, p1, p2, p3):
     angle *= 180 / math.pi
 
     # calculated exact point on irregular polygon where angle is 180 with desmos
-    # basically points to the right side of the line formed by the 180 degrees point and p1
-    # will have their angles changed to 180 to 360 degrees
+    ''' 
+    basically points to the right side of the line formed by the 180 degrees point and p1
+    will have their angles changed to 180 to 360 degrees
+    '''
     if p3[0] >= p180[0] or p3[0] >= p2[0] and p3[1] <= p2[1]:
         angle = 360 - angle
     return angle
@@ -238,11 +240,12 @@ def distancePointToLine(line, point):
     d = abs((p2[0] - p1[0]) * (p1[1] - p0[1]) - (p1[0] - p0[0]) * (p2[1] - p1[1])) / distance(p1[0], p1[1], p2[0], p2[1]) 
     return d
 
-# rationale for irregular circle intersection:
-# 1. determine angle of circle center relative to irregular polygon center (300, 300)
-# 2. Check if the distance between angle center and selected line segment
-# is less than circle's radius
-
+'''
+rationale for irregular polygon-circle intersection:
+1. determine angle of circle center relative to irregular polygon center (300, 300)
+2. Check if the distance between angle center and selected line segment
+is less than circle's radius
+'''
 def playerCollison(app):
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
@@ -264,7 +267,6 @@ def playerCollison(app):
                     app.gameOver = True
     
 def projectileObstacleCollison(app):
-     # not perfect since circle can be in square
     projectileDict = app.projectileDict.copy()
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
@@ -287,7 +289,7 @@ def projectileObstacleCollison(app):
                     app.obstacleDict.pop(obstacle)
                 app.projectileDict.pop(projectile)
 
-# square circle collison
+# irregular polygon sqaure collison
 # source: https://www.jeffreythompson.org/collision-detection/circle-rect.php
 def playerObstacleCollison(app):
     obstacleDict = app.obstacleDict.copy()
@@ -308,8 +310,10 @@ def playerObstacleCollison(app):
         checks if the shapes intersect and which side of the rectangle 
         the circle is on to prevent the user from moving farther from that side
         '''
-        # add 15 (how much everything else moves) so player
-        # cannot make the move that makes it intersect with the recatangle
+        '''
+        add 15 (how much everything else moves) so player
+        cannot make the move that makes it intersect with the recatangle
+        '''
         if (distance(closestX, closestY, app.player.x, app.player.y) <= app.player.size + 15):
             if app.player.x > closestX:
                 return 'left'
@@ -568,6 +572,7 @@ def drawPlayer(app):
     sprite = app.playerSprites[app.playerSpriteCounter]
     drawImage(sprite, 280.5, 275)
 
+# could be used for debugging
 def drawPlayerBox(app):
     for i in range(len(app.coordinates)):
         if i < len(app.coordinates) - 1:
