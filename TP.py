@@ -244,29 +244,24 @@ def distancePointToLine(line, point):
 # is less than circle's radius
 
 def playerCollison(app):
-    size = 25
-    projectile = (app.projectileX, app.projectileY)
-    center = (191.5, 245)
-    for i in range(len(app.angles)):
-        angle = angleCalc(center, app.coordinates[0], projectile)
-        if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
-            print(angle)
-            lineSegment = (app.coordinates[i], app.coordinates[i + 1])
-            if distancePointToLine(lineSegment, projectile) <= size:
-                return True
-    return False
-
-# move it to funciton above
-def playerCollison(app):
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
+    
     for enemy in enemyDict:
-        for projectile in projectileDict:
-            if ((distance(app.player.x, app.player.y, projectileDict[projectile][0], projectileDict[projectile][1]) 
-                <= app.player.size + projectile.size) or
-                (distance(app.player.x, app.player.y, enemyDict[enemy][0], enemyDict[enemy][1])
-                <= app.player.size + enemy.size)):
-                app.gameOver = True
+        for i in range(len(app.angles)):
+            angle = angleCalc(app, (app.player.x, app.player.y), app.coordinates[0], enemyDict[enemy])
+            if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
+                lineSegment = (app.coordinates[i], app.coordinates[i + 1])
+                if distancePointToLine(lineSegment, enemyDict[enemy]) <= enemy.size:
+                    app.gameOver = True
+
+    for projectile in projectileDict:
+        for i in range(len(app.angles)):
+            angle = angleCalc(app, (app.player.x, app.player.y), app.coordinates[0], projectileDict[projectile])
+            if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
+                lineSegment = (app.coordinates[i], app.coordinates[i + 1])
+                if distancePointToLine(lineSegment, projectileDict[projectile]) <= projectile.size:
+                    app.gameOver = True
     
 def projectileObstacleCollison(app):
      # not perfect since circle can be in square
