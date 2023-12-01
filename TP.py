@@ -143,12 +143,11 @@ def onStep(app):
 
             # spawns enemies, moreso as time moves on
             if app.forwardCounter < 4000:
-                enemySpawnRate = 5 - app.forwardCounter / 1000
+                enemySpawnRate = 5 - app.forwardCounter // 1000
             else:
                 enemySpawnRate = 1
             if app.spawnCounter % enemySpawnRate == 0:
-                # spawnEnemies(app)
-                pass
+                spawnEnemies(app)
 
             moveEnemies(app)
 
@@ -163,7 +162,7 @@ def onStep(app):
 
             # spawns obstacles, moreso as time moves on
             if app.forwardCounter < 6000:
-                obstacleSpawnRate = 30 - app.forwardCounter / 300
+                obstacleSpawnRate = 30 - app.forwardCounter // 300
             else:
                 obstacleSpawnRate = 10
             if app.spawnCounter % obstacleSpawnRate == 0:
