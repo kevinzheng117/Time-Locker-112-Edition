@@ -181,10 +181,10 @@ def onStep(app):
 
         removesObjects(app)
 
-        # checkShadow(app)
+        checkShadow(app)
 
+# circle-circle collision
 def enemyProjectileCollision(app):
-    # bug needs fixing, not sure why
     enemyDict = app.enemyDict.copy()
     projectileDict = app.projectileDict.copy()
     for enemy in enemyDict:
@@ -282,6 +282,7 @@ similar to irregular polygon-square intersection except radius changes based on
 the angel
 '''
 # source: https://math.stackexchange.com/questions/924272/find-multiple-of-radius-of-square-given-angle-of-line
+# very buggy
 def playerObstacleCollision(app):
     obstacleDict = app.obstacleDict.copy()
 
@@ -317,23 +318,33 @@ def playerObstacleCollision(app):
                 if app.player.y >= obstacleCenter[1]:
                     angleR = 360 - angleR
 
+                newAngleR = angleR
                 # algorithm only works for angles in between -45 and 45
-                while angleR >= 45:
-                    angleR -= 90
+                while newAngleR >= 45:
+                    newAngleR -= 90
 
                 # python has no built in secant or cosecant function
-                if almostEqual(0, angleR):
+                if almostEqual(0, newAngleR):
                     radius = obstacle.size / 2
                 else:
-                    angleR *= math.pi/180
+                    newAngleR *= math.pi/180
                     # python trig function takes in radians
-                    sec = 1/math.cos(angleR)
-                    csc = 1/math.sin(angleR)
+                    sec = 1/math.cos(newAngleR)
+                    csc = 1/math.sin(newAngleR)
                     radius = obstacle.size / 2 * min(abs(sec), abs(csc))
             
                 # distance from the center of the square towards the direction of player center
-                if distancePointToLine(lineSegment, obstacleCenter) <= radius:
-                    print(True)
+                # 15 is the amount everything moves
+                if distancePointToLine(lineSegment, obstacleCenter) <= radius + 15:
+                    if angleR >= 315 or angleR <= 45:
+                        return 'left'
+                    elif angleR >= 45 and angleR <= 135:
+                        return 'down'
+                    elif angleR >= 135 and angleR <= 225:
+                        return 'right'
+                    elif angleR >= 225 and angleR <= 315:
+                        return 'up'
+                    return None
                     
 # circle-rectangle collison
 # source: https://www.jeffreythompson.org/collision-detection/circle-rect.php
@@ -489,7 +500,8 @@ def onKeyRelease(app, key):
         app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):   
-    if ('right' in keys and app.gameOver == False and app.startMenu == False):
+    if ('right' in keys and playerObstacleCollision(app) != 'right' and 
+        app.gameOver == False and app.startMenu == False):
             # moves enemies, obstacles, projectiles
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] -= 15
@@ -502,8 +514,8 @@ def onKeyHold(app, keys):
             app.backgroundImageX -= 15
             if app.backgroundImageX == -app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif ('left' in keys and playerObstacleCollision(app) != 'left'
-          and app.gameOver == False and app.startMenu == False):
+    elif ('left' in keys and playerObstacleCollision(app) != 'left' and
+          app.gameOver == False and app.startMenu == False):
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] += 15
             for obstacle in app.obstacleDict:
@@ -514,7 +526,8 @@ def onKeyHold(app, keys):
             app.backgroundImageX += 15
             if app.backgroundImageX == app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif ('up' in keys and app.gameOver == False and app.startMenu == False):
+    elif ('up' in keys and playerObstacleCollision(app) != 'up' and
+          app.gameOver == False and app.startMenu == False):
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] += 15
             for obstacle in app.obstacleDict:
@@ -530,7 +543,8 @@ def onKeyHold(app, keys):
             app.backgroundImageY += 15
             if app.backgroundImageY == app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    elif ('down' in keys and app.gameOver == False and app.startMenu == False):
+    elif ('down' in keys and playerObstacleCollision(app) != 'down' and 
+          app.gameOver == False and app.startMenu == False):
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][1] -= 15
             for obstacle in app.obstacleDict:
@@ -629,7 +643,7 @@ def redrawAll(app):
             drawEnemy(app)
             drawProjectile(app)
             drawObstacle(app)
-            # drawShadow(app)
+            drawShadow(app)
             drawScoreLine(app)
         
     else:

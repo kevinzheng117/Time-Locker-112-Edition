@@ -46,7 +46,6 @@ rationale for irregular polygon-circle intersection:
 2. Check if the distance between angle center and selected line segment
 is less than circle's radius
 '''
-
 # vector calculation using dot product
 # source: https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
 # only returns 0 to 180 degrees since it's calculating the angle between 2 vectors
