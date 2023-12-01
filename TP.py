@@ -141,8 +141,12 @@ def onStep(app):
         if app.stepsPerSecond > 10:
             app.spawnCounter += 1
 
-            # spawns enemies
-            if app.spawnCounter % 5 == 0:
+            # spawns enemies, moreso as time moves on
+            if app.forwardCounter < 4000:
+                enemySpawnRate = 5 - app.forwardCounter / 1000
+            else:
+                enemySpawnRate = 1
+            if app.spawnCounter % enemySpawnRate == 0:
                 # spawnEnemies(app)
                 pass
 
@@ -157,8 +161,12 @@ def onStep(app):
             
             moveProjectiles(app)
 
-            # spawns obstacles
-            if app.spawnCounter % 30 == 0:
+            # spawns obstacles, moreso as time moves on
+            if app.forwardCounter < 6000:
+                obstacleSpawnRate = 30 - app.forwardCounter / 300
+            else:
+                obstacleSpawnRate = 10
+            if app.spawnCounter % obstacleSpawnRate == 0:
                 spawnObstacles(app)
 
             # move sprite
