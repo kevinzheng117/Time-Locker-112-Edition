@@ -181,10 +181,7 @@ def onStep(app):
         enemyProjectileCollision(app)
 
         playerEnemyProjectileCollision(app)
-        
-        if playerObstacleCollision(app) != None:
-            undoMove(app)
-
+    
         projectileObstacleCollision(app)
 
         crossScoreLine(app)
@@ -292,13 +289,15 @@ def playerEnemyProjectileCollision(app):
 rationale for irregular polygon-rectangle intersection:
 check every single line segment to see if they intersect with any side of rectangle
 '''
-def playerObstacleCollision(app):
+def playerObstacleCollision(app, move):
     obstacleDict = app.obstacleDict.copy()
-
     for obstacle in obstacleDict:
+        obstacleDict[obstacle] = obstacleDict[obstacle][0] + move[0], obstacleDict[obstacle][1] + move[1]
+
         obstacleCenter = (obstacleDict[obstacle][0] + obstacle.size / 2, 
                           obstacleDict[obstacle][1] + obstacle.size / 2)
         obstacleLeftTop = obstacleDict[obstacle] 
+
         for i in range(len(app.angles)):
             lineSegment = (app.coordinates[i], app.coordinates[i + 1])
 
@@ -330,14 +329,7 @@ def playerObstacleCollision(app):
                             u = -1
                             t = -1
                         if 0 <= t and t <= 1 and 0 <= u and u <= 1:
-                            if i == 0 and j == 1:
-                                return 'down'
-                            elif i == 0 and j == 2:
-                                return 'right'
-                            elif i == 1 and j == 3:
-                                return 'left'
-                            elif i == 2 and j == 3:
-                                return 'up'
+                            return True
 
 # circle-rectangle collison
 # source: https://www.jeffreythompson.org/collision-detection/circle-rect.php
@@ -493,62 +485,73 @@ def onKeyRelease(app, key):
         app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):   
-    if ('right' in keys and playerObstacleCollision(app) != 'right' and 
-        app.gameOver == False and app.startMenu == False):
-            # moves enemies, obstacles, projectiles
+    if ('right' in keys and app.gameOver == False and app.startMenu == False):
+            move = [-15, 0]
+            while playerObstacleCollision(app, move) == True:
+                move[0] += 1
+
             for enemy in app.enemyDict:
-                app.enemyDict[enemy][0] -= 15
+                app.enemyDict[enemy][0] += move[0]
             for obstacle in app.obstacleDict:
-                app.obstacleDict[obstacle][0] -= 15
+                app.obstacleDict[obstacle][0] += move[0]
             for projectile in app.projectileDict:
-                app.projectileDict[projectile][0] -= 15
+                app.projectileDict[projectile][0] += move[0]
             
             # moves background
-            app.backgroundImageX -= 15
+            app.backgroundImageX += move[0]
             if app.backgroundImageX == -app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif ('left' in keys and playerObstacleCollision(app) != 'left' and
-          app.gameOver == False and app.startMenu == False):
+    elif ('left' in keys and app.gameOver == False and app.startMenu == False):
+            move = [15, 0]
+            while playerObstacleCollision(app, move) == True:
+                move[0] -= 1
+                
             for enemy in app.enemyDict:
-                app.enemyDict[enemy][0] += 15
+                app.enemyDict[enemy][0] += move[0]
             for obstacle in app.obstacleDict:
-                app.obstacleDict[obstacle][0] += 15
+                app.obstacleDict[obstacle][0] += move[0]
             for projectile in app.projectileDict:
-                app.projectileDict[projectile][0] += 15
+                app.projectileDict[projectile][0] += move[0]
 
-            app.backgroundImageX += 15
+            app.backgroundImageX += move[0]
             if app.backgroundImageX == app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif ('up' in keys and playerObstacleCollision(app) != 'up' and
-          app.gameOver == False and app.startMenu == False):
+    elif ('up' in keys and app.gameOver == False and app.startMenu == False):
+            move = [0, 15]
+            while playerObstacleCollision(app, move) == True:
+                move[1] -= 1
+
             for enemy in app.enemyDict:
-                app.enemyDict[enemy][1] += 15
+                app.enemyDict[enemy][1] += move[1]
             for obstacle in app.obstacleDict:
-                app.obstacleDict[obstacle][1] += 15
+                app.obstacleDict[obstacle][1] += move[1]
             for projectile in app.projectileDict:
-                app.projectileDict[projectile][1] += 15
+                app.projectileDict[projectile][1] += move[1]
             
             # keeps track for shadow and score line
-            app.shadowCounter -= 10
-            app.forwardCounter += 10
+            app.shadowCounter -= move[1]
+            app.forwardCounter += move[1]
 
             # moves background (no up-down wrap around implemented yet)
-            app.backgroundImageY += 15
+            app.backgroundImageY += move[1]
             if app.backgroundImageY == app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    elif ('down' in keys and playerObstacleCollision(app) != 'down' and 
-          app.gameOver == False and app.startMenu == False):
-            for enemy in app.enemyDict:
-                app.enemyDict[enemy][1] -= 15
-            for obstacle in app.obstacleDict:
-                app.obstacleDict[obstacle][1] -= 15
-            for projectile in app.projectileDict:
-                app.projectileDict[projectile][1] -= 15
-            
-            app.shadowCounter += 10
-            app.forwardCounter -= 10
+    elif ('down' in keys and app.gameOver == False and app.startMenu == False):
+            move = [0, -15]
+            while playerObstacleCollision(app, move) == True:
+                move[1] += 1
 
-            app.backgroundImageY -= 15
+            for enemy in app.enemyDict:
+                app.enemyDict[enemy][1] += move[1]
+            for obstacle in app.obstacleDict:
+                app.obstacleDict[obstacle][1] += move[1]
+            for projectile in app.projectileDict:
+                app.projectileDict[projectile][1] += move[1]
+            
+            app.shadowCounter -= move[1]
+            app.forwardCounter += move[1]
+
+            app.backgroundImageY += move[1]
             if app.backgroundImageY == -app.backgroundImageHeight:
                 app.backgroundImageY = 0
     if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
