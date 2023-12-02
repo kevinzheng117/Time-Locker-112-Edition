@@ -88,16 +88,6 @@ def newGame(app):
     app.backgroundImageHeight =  app.backgroundImage.height
     app.backgroundImage = CMUImage(app.backgroundImage)
 
-    '''
-    tried implementing images as obstacles 
-    (resize in function then convert to CMU image)
-    but slowed down program significantly
-    '''
-    # source: https://i.pinimg.com/550x/20/84/42/208442642ff691ac20846b9376db3830.jpg
-    app.obstacleImage = Image.open("Images/obstacle.jpg")
-    app.obstacleImageWidth = app.obstacleImage.width
-    app.obstacleImageHeight = app.obstacleImage.height
-
     # source: https://openclipart.org/detail/215080/retro-character-sprite-sheet
     playerSpritestrip = Image.open('Images/player sprite.png')
     newWidth, newHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height*10 // 98)
@@ -111,8 +101,23 @@ def newGame(app):
                                                 (383 + 383 * i)/app.playerScaleFactor,
                                                 2000/app.playerScaleFactor)))
         app.playerSprites.append(sprite)
+    
+    # source: https://img.itch.zone/aW1hZ2UvOTQxMTM5LzgyNjc1MjkuZ2lm/original/XziAqG.gif
+    bulletGif = Image.open('Images/bullet.gif')
+    app.bulletSprites = []
+    for frame in range(bulletGif.n_frames):
+        #Set the current frame
+        bulletGif.seek(frame)
+        #Resize the image to projectile size
+        fr = bulletGif.resize((15, 15))
+        #Convert to CMUImage
+        fr = CMUImage(fr)
+        #Put in our sprite list
+        app. bulletSprites.append(fr)
 
+    # for all sprites
     app.playerSpriteCounter = 0
+    app.bulletSpriteCounter = 0
 
     # coordinates to irregular polygon; written in a separate file so dimensions are different
     app.coordinates = [[105, 23], [27, 105], [27, 280], [0, 300], [0, 390], 
@@ -167,8 +172,10 @@ def onStep(app):
             if app.spawnCounter % obstacleSpawnRate == 0:
                 spawnObstacles(app)
 
-            # move sprite
+            # move sprites
             app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
+            app.bulletSpriteCounter = (1 + app.bulletSpriteCounter) % len(app.bulletSprites)
+
         # shadow should have constant speed regardless of game time
         app.shadowCounter += 50 / app.stepsPerSecond 
 
@@ -554,7 +561,6 @@ def onKeyHold(app, keys):
         if app.stepsPerSecond < 50:
             app.stepsPerSecond += 2
 
-# move drawEnemy and drawProjectile into their classes
 def drawEnemy(app):
     for enemy in app.enemyDict:
         if enemy.follow == True and enemy.shoot == True:
@@ -573,12 +579,9 @@ def drawObstacle(app):
 
 def drawProjectile(app):
     for projectile in app.projectileDict:
-        if projectile.direction == (0, -1):
-            color = 'orange'
-        else:
-            color = 'cyan'
-        
-        drawCircle(app.projectileDict[projectile][0], app.projectileDict[projectile][1], projectile.size, fill = color)
+        drawImage(app.bulletSprites[app.bulletSpriteCounter], 
+                  app.projectileDict[projectile][0], 
+                  app.projectileDict[projectile][1], align = 'center')
 
 def drawShadow(app):
     if app.shadowCounter > 0:
