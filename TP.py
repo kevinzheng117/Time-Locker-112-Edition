@@ -130,8 +130,6 @@ def newGame(app):
                   (107, 132.6), (132.6, 185.7), (185.7, 212.2), (212.2, 232.7), 
                   (232.7, 237.2), (237.2, 301.7), (301.7, 360)]
     
-    app.obstacleDict[Obstacle(100)] = [250, 50]
-
 def onAppStart(app):
     app.highScore = 0
     newGame(app)
@@ -149,13 +147,11 @@ def onStep(app):
             else:
                 enemySpawnRate = 1
             if app.spawnCounter % enemySpawnRate == 0:
-                # spawnEnemies(app)
-                pass
+                spawnEnemies(app)
 
             moveEnemies(app)
 
-            # spawns player projectiles
-            if app.spawnCounter % 4 == 0:
+            if app.spawnCounter % 3 == 0:
                 spawnPlayerProjectiles(app)
 
             if app.spawnCounter % 15 == 0:
@@ -169,8 +165,7 @@ def onStep(app):
             else:
                 obstacleSpawnRate = 10
             if app.spawnCounter % obstacleSpawnRate == 0:
-                # spawnObstacles(app)
-                pass
+                spawnObstacles(app)
 
             # move sprite
             app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
@@ -190,7 +185,7 @@ def onStep(app):
 
         removesObjects(app)
 
-        # checkShadow(app)
+        checkShadow(app)
 
 # circle-circle collision
 def enemyProjectileCollision(app):
@@ -486,6 +481,7 @@ def onKeyRelease(app, key):
 
 def onKeyHold(app, keys):   
     if ('right' in keys and app.gameOver == False and app.startMenu == False):
+            # modify the amount the player moves so there is no overlap with obstacles
             move = [-15, 0]
             while playerObstacleCollision(app, move) == True:
                 move[0] += 1
@@ -639,7 +635,7 @@ def redrawAll(app):
             drawEnemy(app)
             drawProjectile(app)
             drawObstacle(app)
-            # drawShadow(app)
+            drawShadow(app)
             drawScoreLine(app)
         
     else:
