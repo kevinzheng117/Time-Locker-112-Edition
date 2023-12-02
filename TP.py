@@ -129,6 +129,8 @@ def newGame(app):
     app.angles = [(0, 28.3), (28.3, 81.3), (81.3, 84.5), (84.5, 107), 
                   (107, 132.6), (132.6, 185.7), (185.7, 212.2), (212.2, 232.7), 
                   (232.7, 237.2), (237.2, 301.7), (301.7, 360)]
+    
+    app.obstacleDict[Obstacle(100)] = [250, 50]
 
 def onAppStart(app):
     app.highScore = 0
@@ -147,7 +149,8 @@ def onStep(app):
             else:
                 enemySpawnRate = 1
             if app.spawnCounter % enemySpawnRate == 0:
-                spawnEnemies(app)
+                # spawnEnemies(app)
+                pass
 
             moveEnemies(app)
 
@@ -166,7 +169,8 @@ def onStep(app):
             else:
                 obstacleSpawnRate = 10
             if app.spawnCounter % obstacleSpawnRate == 0:
-                spawnObstacles(app)
+                # spawnObstacles(app)
+                pass
 
             # move sprite
             app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
@@ -178,7 +182,8 @@ def onStep(app):
 
         playerEnemyProjectileCollision(app)
         
-        playerObstacleCollision(app)
+        if playerObstacleCollision(app) != None:
+            undoMove(app)
 
         projectileObstacleCollision(app)
 
@@ -188,7 +193,7 @@ def onStep(app):
 
         removesObjects(app)
 
-        checkShadow(app)
+        # checkShadow(app)
 
 # circle-circle collision
 def enemyProjectileCollision(app):
@@ -285,74 +290,55 @@ def playerEnemyProjectileCollision(app):
 
 '''
 rationale for irregular polygon-rectangle intersection:
-similar to irregular polygon-square intersection except radius changes based on
-the angel
+check every single line segment to see if they intersect with any side of rectangle
 '''
-# source: https://math.stackexchange.com/questions/924272/find-multiple-of-radius-of-square-given-angle-of-line
-# very buggy
 def playerObstacleCollision(app):
     obstacleDict = app.obstacleDict.copy()
-
-    # to adjust for the fact that we said the first coordinate in our list is 0 degrees
-    # calculated exact point on irregular polygon where angle is 180 with desmos
-    p180 = [288, 490]
-    # same kind of adjustments as app.coordinates
-    p180[0] //= app.playerScaleFactor
-    p180[1] // app.playerScaleFactor
-    p180[0] += 280
-    p180[1] += 275
 
     for obstacle in obstacleDict:
         obstacleCenter = (obstacleDict[obstacle][0] + obstacle.size / 2, 
                           obstacleDict[obstacle][1] + obstacle.size / 2)
-        obstacle0Point = (obstacleDict[obstacle][0] + obstacle.size, obstacleDict[obstacle][1] + obstacle.size / 2) 
+        obstacleLeftTop = obstacleDict[obstacle] 
         for i in range(len(app.angles)):
-            angle = angleCalc(app, (app.player.x, app.player.y), app.coordinates[0], obstacleCenter)
-            ''' 
-            basically points to the right side of the line formed by the 180 degrees 
-            point and p1 will have their angles changed to 180 to 360 degrees
+            lineSegment = (app.coordinates[i], app.coordinates[i + 1])
+
+            obstacleRightTop = (obstacleDict[obstacle][0] + obstacle.size, obstacleDict[obstacle][1])
+            obstacleLeftBottom = (obstacleDict[obstacle][0], obstacleDict[obstacle][1] + obstacle.size)
+            obstacleRightBottom = (obstacleDict[obstacle][0] + obstacle.size, obstacleDict[obstacle][1] + obstacle.size)
+            verticesList = [obstacleLeftTop, obstacleRightTop, obstacleLeftBottom, obstacleRightBottom]
+            # rationale: check line segment collision with 4 line segments of the rectangle
             '''
-            if (obstacleCenter[0] >= p180[0] or 
-                obstacleCenter[0] >= app.coordinates[0][0] and 
-                obstacleCenter[1] <= app.coordinates[0][1]):
-                angle = 360 - angle
+            uses line segment intersection formula from
+            source: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+            #:~:text=In%20order%20to%20find%20the,of%20first%20degree%20B%C3%A9z
+            ier%20parameters%3A&text=There%20will%20be%20an%20intersection,0%20%
+            E2%89%A4%20u%20%E2%89%A4%201.
+            '''
+            x1, y1 = lineSegment[0]
+            x2, y2 = lineSegment[1]
 
-            if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
-                lineSegment = (app.coordinates[i], app.coordinates[i + 1])
-                angleR = angleCalc(app, obstacleCenter, (app.player.x, app.player.y), obstacle0Point)
+            for i in range(len(verticesList)):
+                x3, y3 = verticesList[i]
+                for j in range(i + 1, len(verticesList)):
+                    x4, y4 = verticesList[j]
+                    if x3 == x4 or y3 == y4:
+                        if ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)) != 0:
+                            t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
+                            u = ((x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
+                        # to account for division by 0 when closest line segment and rectangle side are parallel
+                        else:
+                            u = -1
+                            t = -1
+                        if 0 <= t and t <= 1 and 0 <= u and u <= 1:
+                            if i == 0 and j == 1:
+                                return 'down'
+                            elif i == 0 and j == 2:
+                                return 'right'
+                            elif i == 1 and j == 3:
+                                return 'left'
+                            elif i == 2 and j == 3:
+                                return 'up'
 
-                # adjusts angles past 180 degrees
-                if app.player.y >= obstacleCenter[1]:
-                    angleR = 360 - angleR
-
-                newAngleR = angleR
-                # algorithm only works for angles in between -45 and 45
-                while newAngleR >= 45:
-                    newAngleR -= 90
-
-                # python has no built in secant or cosecant function
-                if almostEqual(0, newAngleR):
-                    radius = obstacle.size / 2
-                else:
-                    newAngleR *= math.pi/180
-                    # python trig function takes in radians
-                    sec = 1/math.cos(newAngleR)
-                    csc = 1/math.sin(newAngleR)
-                    radius = obstacle.size / 2 * min(abs(sec), abs(csc))
-            
-                # distance from the center of the square towards the direction of player center
-                # 15 is the amount everything moves
-                if distancePointToLine(lineSegment, obstacleCenter) <= radius + 15:
-                    if angleR >= 315 or angleR <= 45:
-                        return 'left'
-                    elif angleR >= 45 and angleR <= 135:
-                        return 'down'
-                    elif angleR >= 135 and angleR <= 225:
-                        return 'right'
-                    elif angleR >= 225 and angleR <= 315:
-                        return 'up'
-                    return None
-                    
 # circle-rectangle collison
 # source: https://www.jeffreythompson.org/collision-detection/circle-rect.php
 def projectileObstacleCollision(app):
@@ -650,7 +636,7 @@ def redrawAll(app):
             drawEnemy(app)
             drawProjectile(app)
             drawObstacle(app)
-            drawShadow(app)
+            # drawShadow(app)
             drawScoreLine(app)
         
     else:

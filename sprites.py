@@ -103,19 +103,19 @@ def playerProjectileEnemyCollison(app):
 
 '''
 rationale for irregular polygon-rectangle intersection:
-similar to irregular polygon-square intersection except radius changes based on
-the angle
+similar to irregular polygon-square intersection except last step
 '''
 # source: https://math.stackexchange.com/questions/924272/find-multiple-of-radius-of-square-given-angle-of-line
 def playerObstacleCollison(app):
     length = 100
-    obstacleCenter = (app.obstacleX, app.obstacleY)
+    obstacleLeftTop = (app.obstacleX, app.obstacleY)
+    obstacleCenter = (app.obstacleX + length / 2, app.obstacleY + length / 2)
     center = (291.5, 345)
     obstacle0Point = (app.obstacleX + length/2, app.obstacleY)
 
     # adjust for the fact that 0 degrees is first coordainte in list
     # calculated exact point on irregular polygon where angle is 180 with desmos
-    p180 = (288, 490)
+    p180 = (388, 590)
 
     for i in range(len(app.angles)):
         angle = angleCalc(center, app.coordinates[0], obstacleCenter)
@@ -128,30 +128,37 @@ def playerObstacleCollison(app):
 
         if angle >= app.angles[i][0] and angle <= app.angles[i][1]:
             lineSegment = (app.coordinates[i], app.coordinates[i + 1])
-            angleR = angleCalc(obstacleCenter, center, obstacle0Point)
-            if center[1] >= obstacleCenter[1]:
-                angleR = 360 - angleR
-
-            while angleR >= 45:
-                angleR -= 90
-
-            print(angleR)
-
-            # python has no built in secant or cosecant function
-            if angleR == 0:
-                radius = length / 2
-            else:
-                angleR *= math.pi/180
-                sec = 1/math.cos(angleR)
-                csc = 1/math.sin(angleR)
-                radius = length /2 * min(abs(sec), abs(csc))
             
-            print(radius)
-            # distance from the center of the square towards the direction of player center
-            if distancePointToLine(lineSegment, obstacleCenter) <= radius:
-                print(True)
-                
+            obstacleRightTop = (app.obstacleX + length, app.obstacleY)
+            obstacleLeftBottom = (app.obstacleX, app.obstacleY + length)
+            obstacleRightBottom = (app.obstacleX + length, app.obstacleY + length)
+            verticesList = [obstacleLeftTop, obstacleRightTop, obstacleLeftBottom, obstacleRightBottom]
+            # check line segment collision with 4 line segments of the rectangle
+            '''
+            uses line segment intersection formula from
+            source: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+            #:~:text=In%20order%20to%20find%20the,of%20first%20degree%20B%C3%A9z
+            ier%20parameters%3A&text=There%20will%20be%20an%20intersection,0%20%
+            E2%89%A4%20u%20%E2%89%A4%201.
+            '''
+            x1, y1 = lineSegment[0]
+            x2, y2 = lineSegment[1]
 
+            for i in range(len(verticesList)):
+                x3, y3 = verticesList[i]
+                for j in range(i + 1, len(verticesList)):
+                    x4, y4 = verticesList[j]
+                    if x3 == x4 or y3 == y4:
+                        if ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)) != 0:
+                            t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
+                            u = ((x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
+                        # to account for division by 0 when closest line segment and rectangle side are parallel
+                        else:
+                            u = -1
+                            t = -1
+                        if 0 <= t and t <= 1 and 0 <= u and u <= 1:
+                            return True
+                        
 def onMousePress(app, mouseX, mouseY):
     # app.projectileX = mouseX
     # app.projectileY = mouseY
@@ -164,7 +171,7 @@ def redrawAll(app):
     # drawImage(sprite, 0, 0)
     drawCircle(291.5, 345, 5)
     # drawCircle(app.projectileX, app.projectileY, 25)
-    drawRect(app.obstacleX, app.obstacleY, 100, 100, align = 'center')
+    drawRect(app.obstacleX, app.obstacleY, 100, 100, fill = None, border = 'black')
     drawCircle(388, 590, 5)
     # print(playerProjectileEnemyCollison(app))
     print(playerObstacleCollison(app))
