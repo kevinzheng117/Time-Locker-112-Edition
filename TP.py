@@ -626,7 +626,8 @@ def redrawAll(app):
         # want player and background to appear in the start menu
         drawBackground(app)
         drawPlayer(app)
-        drawPlayerBox(app)
+        # for debugging: drawPlayerBox(app)
+
         # draw start menu
         if app.startMenu == True:
             drawMenu(app)
