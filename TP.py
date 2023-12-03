@@ -206,9 +206,9 @@ def enemyProjectileCollision(app):
                 if enemy.health == 0:
                     app.enemyDict.pop(enemy)
                     if enemy.follow == True and enemy.shoot == True:
-                        app.score += 3
+                        app.score += 5
                     elif enemy.follow == True:
-                        app.score += 2
+                        app.score += 3
                     else:
                         app.score += 1
                 app.projectileDict.pop(projectile)
@@ -387,12 +387,15 @@ def createNewEnemies(app):
     num = random.randint(1, 20)
     follow = False
     shoot = False
+    health = 1
     # spawn different harder enemies as player progresses
     if app.forwardCounter >= 1000 and num >= 15:
             follow = True
+            health = 2
             if num == 20 and app.forwardCounter >= 2000:
                 shoot = True
-    newEnemy = Enemy(1, 15, random.choice(directions), follow, shoot)
+            health = 3
+    newEnemy = Enemy(health, 15, random.choice(directions), follow, shoot)
     return newEnemy
 
 def createNewObstacles(app):
@@ -476,7 +479,7 @@ def removesObjects(app):
     projectileDict = app.projectileDict.copy()
     for projectile in projectileDict:
         # remove player projectiles that move off screen
-        if projectileDict[projectile][1] < -10:
+        if projectileDict[projectile][1] < -50:
             app.projectileDict.pop(projectile)
 
     enemyDict = app.enemyDict.copy()
