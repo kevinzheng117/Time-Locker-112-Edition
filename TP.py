@@ -502,13 +502,13 @@ def onKeyHold(app, keys):
             
             # moves background
             app.backgroundImageX += move[0]
-            if app.backgroundImageX == -app.backgroundImageWidth:
+            if app.backgroundImageX <= -app.backgroundImageWidth:
                 app.backgroundImageX = 0
     elif ('left' in keys and app.gameOver == False and app.startMenu == False):
             move = [15, 0]
             while playerObstacleCollision(app, move) == True:
                 move[0] -= 1
-                
+
             for enemy in app.enemyDict:
                 app.enemyDict[enemy][0] += move[0]
             for obstacle in app.obstacleDict:
@@ -517,7 +517,7 @@ def onKeyHold(app, keys):
                 app.projectileDict[projectile][0] += move[0]
 
             app.backgroundImageX += move[0]
-            if app.backgroundImageX == app.backgroundImageWidth:
+            if app.backgroundImageX >= app.backgroundImageWidth:
                 app.backgroundImageX = 0
     elif ('up' in keys and app.gameOver == False and app.startMenu == False):
             move = [0, 15]
@@ -537,7 +537,7 @@ def onKeyHold(app, keys):
 
             # moves background (no up-down wrap around implemented yet)
             app.backgroundImageY += move[1]
-            if app.backgroundImageY == app.backgroundImageHeight:
+            if app.backgroundImageY >= app.backgroundImageHeight:
                 app.backgroundImageY = 0
     elif ('down' in keys and app.gameOver == False and app.startMenu == False):
             move = [0, -15]
@@ -555,7 +555,7 @@ def onKeyHold(app, keys):
             app.forwardCounter += move[1]
 
             app.backgroundImageY += move[1]
-            if app.backgroundImageY == -app.backgroundImageHeight:
+            if app.backgroundImageY <= -app.backgroundImageHeight:
                 app.backgroundImageY = 0
     if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
         if app.stepsPerSecond < 50:
