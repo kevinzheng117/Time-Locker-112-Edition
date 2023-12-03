@@ -289,7 +289,8 @@ def playerEnemyProjectileCollision(app):
 
 '''
 rationale for irregular polygon-rectangle intersection:
-check every single line segment to see if they intersect with any side of rectangle
+Inputting potential move and then check every single line segment of the irregular polygon
+to see if they intersect with any side of rectangle
 '''
 def playerObstacleCollision(app, move):
     obstacleDict = app.obstacleDict.copy()
@@ -299,7 +300,8 @@ def playerObstacleCollision(app, move):
         obstacleCenter = (obstacleDict[obstacle][0] + obstacle.size / 2, 
                           obstacleDict[obstacle][1] + obstacle.size / 2)
         obstacleLeftTop = obstacleDict[obstacle] 
-
+            
+        # rationale: check irregular polygon line segment collision with 4 line segments of the rectangle
         for i in range(len(app.angles)):
             lineSegment = (app.coordinates[i], app.coordinates[i + 1])
 
@@ -307,7 +309,6 @@ def playerObstacleCollision(app, move):
             obstacleLeftBottom = (obstacleDict[obstacle][0], obstacleDict[obstacle][1] + obstacle.size)
             obstacleRightBottom = (obstacleDict[obstacle][0] + obstacle.size, obstacleDict[obstacle][1] + obstacle.size)
             verticesList = [obstacleLeftTop, obstacleRightTop, obstacleLeftBottom, obstacleRightBottom]
-            # rationale: check line segment collision with 4 line segments of the rectangle
             '''
             uses line segment intersection formula from
             source: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
@@ -473,23 +474,22 @@ def checkShadow(app):
     if app.shadowCounter >= app.player.y:
         app.gameOver = True
 
-def onKeyPress(app, key):
-    if app.gameOver == True:
-        if key != None:
-            newGame(app)
-            app.gameOver = False
-    elif app.startMenu == True:
-        if key != None:
-            app.startMenu = False
-    
 def onKeyRelease(app, key):
     if key in {'right', 'left', 'up', 'down'}:
         app.stepsPerSecond = 10
 
-def onKeyHold(app, keys):   
+def onKeyHold(app, keys):
+    if app.gameOver == True:
+        if len(keys) != 0:
+            newGame(app)
+            app.gameOver = False
+    elif app.startMenu == True:
+        if len(keys) != 0:
+            app.startMenu = False
     if ('right' in keys and app.gameOver == False and app.startMenu == False):
             # modify the amount the player moves so there is no overlap with obstacles
             move = [-15, 0]
+            # every time the player collides with obstacle, lower increment of move
             while playerObstacleCollision(app, move) == True:
                 move[0] += 1
 
