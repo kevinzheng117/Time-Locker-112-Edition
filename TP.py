@@ -156,7 +156,7 @@ def onStep(app):
 
             moveEnemies(app)
 
-            if app.spawnCounter % 3 == 0:
+            if app.spawnCounter % 2 == 0:
                 spawnPlayerProjectiles(app)
 
             if app.spawnCounter % 15 == 0:
@@ -190,7 +190,7 @@ def onStep(app):
 
         updateHighScore(app)
 
-        removesObjects(app)
+        removeObjects(app)
 
         checkShadow(app)
 
@@ -200,6 +200,7 @@ def enemyProjectileCollision(app):
     projectileDict = app.projectileDict.copy()
     for enemy in enemyDict:
         for projectile in projectileDict:
+            print(projectile)
             if (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectileDict[projectile][0], projectileDict[projectile][1]) 
                 <= enemy.size + projectile.size):
                 enemy.health -= projectile.damage
@@ -211,6 +212,7 @@ def enemyProjectileCollision(app):
                         app.score += 3
                     else:
                         app.score += 1
+                print(app.projectileDict)
                 app.projectileDict.pop(projectile)
 
 # vector calculation using dot product
@@ -389,11 +391,11 @@ def createNewEnemies(app):
     shoot = False
     health = 1
     # spawn different harder enemies as player progresses
-    if app.forwardCounter >= 1000 and num >= 15:
-            follow = True
-            health = 2
-            if num == 20 and app.forwardCounter >= 2000:
-                shoot = True
+    if app.forwardCounter >= 1000 and num >= 17:
+        follow = True
+        health = 2
+        if num == 20 and app.forwardCounter >= 2000:
+            shoot = True
             health = 3
     newEnemy = Enemy(health, 15, random.choice(directions), follow, shoot)
     return newEnemy
@@ -475,11 +477,11 @@ def spawnEnemyProjectiles(app):
             app.projectileDict[Projectile(7.5, 1, direction)] = [app.enemyDict[enemy][0], app.enemyDict[enemy][1]]
 
 # speed game up by removing offscreen objects
-def removesObjects(app):
+def removeObjects(app):
     projectileDict = app.projectileDict.copy()
     for projectile in projectileDict:
         # remove player projectiles that move off screen
-        if projectileDict[projectile][1] < -50:
+        if projectileDict[projectile][1] < -10:
             app.projectileDict.pop(projectile)
 
     enemyDict = app.enemyDict.copy()
