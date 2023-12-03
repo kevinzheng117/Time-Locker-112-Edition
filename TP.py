@@ -182,8 +182,6 @@ def onStep(app):
         # checks for any collisions then removes the projectile and enemy
         playerEnemyProjectileCollision(app)
 
-        projectileProjectileCollision(app)
-
         enemyProjectileCollision(app)
 
         projectileObstacleCollision(app)
@@ -198,26 +196,31 @@ def onStep(app):
 
 # circle-circle collision
 def enemyProjectileCollision(app):
-    enemyDict = app.enemyDict.copy()
-    for enemy in enemyDict:
-        projectileDict = app.projectileDict.copy()
-        for projectile in projectileDict:
-            if (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectileDict[projectile][0], projectileDict[projectile][1]) 
+    # cannot modify dictionary while iterating over it
+    # was running into issues when 1 projectile hit 2 enemies (should be fixed)
+    enemiesToRemove = set()
+    projectilesToRemove = set()
+    for enemy in app.enemyDict:
+        for projectile in app.projectileDict:
+            if (distance(app.enemyDict[enemy][0], app.enemyDict[enemy][1], 
+                         app.projectileDict[projectile][0], app.projectileDict[projectile][1]) 
                 <= enemy.size + projectile.size):
-                print(projectile)
-                print(app.projectileDict)
                 enemy.health -= projectile.damage
                 if enemy.health == 0:
-                    app.enemyDict.pop(enemy)
+                    enemiesToRemove.add(enemy)
                     if enemy.follow == True and enemy.shoot == True:
                         app.score += 5
                     elif enemy.follow == True:
                         app.score += 3
                     else:
                         app.score += 1
-                app.projectileDict.pop(projectile)
-                # break out of loop to recalculate projectiles since enemies can overlap
-                break
+                projectilesToRemove.add(projectile)
+
+    for projectile in projectilesToRemove:
+        app.projectileDict.pop(projectile)
+    
+    for enemy in enemiesToRemove:
+        app.enemyDict.pop(enemy)
 
 # vector calculation using dot product
 # source: https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
@@ -374,18 +377,6 @@ def playerSuicide(app):
                 return True
     return False
 
-def projectileProjectileCollision(app):
-    projectileDict1 = app.projectileDict.copy()
-    projectileDict2 = app.projectileDict.copy()
-    for projectile1 in projectileDict1:
-        for projectile2 in projectileDict2:
-            if projectile1 != projectile2:
-                if (distance(projectileDict1[projectile1][0], projectileDict1[projectile1][1], 
-                            projectileDict2[projectile2][0], projectileDict2[projectile2][1]) 
-                    <= projectile1.size + projectile2.size):
-                    app.projectileDict.pop(projectile1)
-                    app.projectileDict.pop(projectile2)
-
 def createNewEnemies(app):
     # twice as likely to spawn enemies that move down
     directions = [(1, 0), (-1, 0), (0, 1), (0, 1)]
@@ -485,7 +476,7 @@ def removeObjects(app):
     projectileDict = app.projectileDict.copy()
     for projectile in projectileDict:
         # remove player projectiles that move off screen
-        if projectileDict[projectile][1] < 0:
+        if projectileDict[projectile][1] < -10:
             app.projectileDict.pop(projectile)
 
     enemyDict = app.enemyDict.copy()
