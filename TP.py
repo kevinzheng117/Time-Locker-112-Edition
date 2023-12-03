@@ -135,6 +135,8 @@ def newGame(app):
                   (107, 132.6), (132.6, 185.7), (185.7, 212.2), (212.2, 232.7), 
                   (232.7, 237.2), (237.2, 301.7), (301.7, 360)]
     
+    app.step = 0
+
 def onAppStart(app):
     app.highScore = 0
     newGame(app)
@@ -180,10 +182,10 @@ def onStep(app):
         app.shadowCounter += 50 / app.stepsPerSecond 
 
         # checks for any collisions then removes the projectile and enemy
+        playerEnemyProjectileCollision(app)
+
         enemyProjectileCollision(app)
 
-        playerEnemyProjectileCollision(app)
-    
         projectileObstacleCollision(app)
 
         crossScoreLine(app)
@@ -477,89 +479,93 @@ def checkShadow(app):
 def onKeyRelease(app, key):
     if key in {'right', 'left', 'up', 'down'}:
         app.stepsPerSecond = 10
+    app.step = 0
 
 def onKeyHold(app, keys):
-    if app.gameOver == True:
-        if len(keys) != 0:
-            newGame(app)
-            app.gameOver = False
-    elif app.startMenu == True:
-        if len(keys) != 0:
-            app.startMenu = False
-    if ('right' in keys and app.gameOver == False and app.startMenu == False):
-            # modify the amount the player moves so there is no overlap with obstacles
-            move = [-15, 0]
-            # every time the player collides with obstacle, lower increment of move
-            while playerObstacleCollision(app, move) == True:
-                move[0] += 1
+    # fixed player suicide by requiring player to hold keys down for a quick period to start move
+    app.step += 1
+    if app.step >= 3:
+        if app.gameOver == True:
+            if len(keys) != 0:
+                newGame(app)
+                app.gameOver = False
+        elif app.startMenu == True:
+            if len(keys) != 0:
+                app.startMenu = False
+        if ('right' in keys and app.gameOver == False and app.startMenu == False):
+                # modify the amount the player moves so there is no overlap with obstacles
+                move = [-15, 0]
+                # every time the player collides with obstacle, lower increment of move
+                while playerObstacleCollision(app, move) == True:
+                    move[0] += 1
 
-            for enemy in app.enemyDict:
-                app.enemyDict[enemy][0] += move[0]
-            for obstacle in app.obstacleDict:
-                app.obstacleDict[obstacle][0] += move[0]
-            for projectile in app.projectileDict:
-                app.projectileDict[projectile][0] += move[0]
-            
-            # moves background
-            app.backgroundImageX += move[0]
-            if app.backgroundImageX <= -app.backgroundImageWidth:
-                app.backgroundImageX = 0
-    elif ('left' in keys and app.gameOver == False and app.startMenu == False):
-            move = [15, 0]
-            while playerObstacleCollision(app, move) == True:
-                move[0] -= 1
+                for enemy in app.enemyDict:
+                    app.enemyDict[enemy][0] += move[0]
+                for obstacle in app.obstacleDict:
+                    app.obstacleDict[obstacle][0] += move[0]
+                for projectile in app.projectileDict:
+                    app.projectileDict[projectile][0] += move[0]
+                
+                # moves background
+                app.backgroundImageX += move[0]
+                if app.backgroundImageX <= -app.backgroundImageWidth:
+                    app.backgroundImageX = 0
+        elif ('left' in keys and app.gameOver == False and app.startMenu == False):
+                move = [15, 0]
+                while playerObstacleCollision(app, move) == True:
+                    move[0] -= 1
 
-            for enemy in app.enemyDict:
-                app.enemyDict[enemy][0] += move[0]
-            for obstacle in app.obstacleDict:
-                app.obstacleDict[obstacle][0] += move[0]
-            for projectile in app.projectileDict:
-                app.projectileDict[projectile][0] += move[0]
+                for enemy in app.enemyDict:
+                    app.enemyDict[enemy][0] += move[0]
+                for obstacle in app.obstacleDict:
+                    app.obstacleDict[obstacle][0] += move[0]
+                for projectile in app.projectileDict:
+                    app.projectileDict[projectile][0] += move[0]
 
-            app.backgroundImageX += move[0]
-            if app.backgroundImageX >= app.backgroundImageWidth:
-                app.backgroundImageX = 0
-    elif ('up' in keys and app.gameOver == False and app.startMenu == False):
-            move = [0, 15]
-            while playerObstacleCollision(app, move) == True:
-                move[1] -= 1
+                app.backgroundImageX += move[0]
+                if app.backgroundImageX >= app.backgroundImageWidth:
+                    app.backgroundImageX = 0
+        elif ('up' in keys and app.gameOver == False and app.startMenu == False):
+                move = [0, 15]
+                while playerObstacleCollision(app, move) == True:
+                    move[1] -= 1
 
-            for enemy in app.enemyDict:
-                app.enemyDict[enemy][1] += move[1]
-            for obstacle in app.obstacleDict:
-                app.obstacleDict[obstacle][1] += move[1]
-            for projectile in app.projectileDict:
-                app.projectileDict[projectile][1] += move[1]
-            
-            # keeps track for shadow and score line
-            app.shadowCounter -= move[1]
-            app.forwardCounter += move[1]
+                for enemy in app.enemyDict:
+                    app.enemyDict[enemy][1] += move[1]
+                for obstacle in app.obstacleDict:
+                    app.obstacleDict[obstacle][1] += move[1]
+                for projectile in app.projectileDict:
+                    app.projectileDict[projectile][1] += move[1]
+                
+                # keeps track for shadow and score line
+                app.shadowCounter -= move[1]
+                app.forwardCounter += move[1]
 
-            # moves background (no up-down wrap around implemented yet)
-            app.backgroundImageY += move[1]
-            if app.backgroundImageY >= app.backgroundImageHeight:
-                app.backgroundImageY = 0
-    elif ('down' in keys and app.gameOver == False and app.startMenu == False):
-            move = [0, -15]
-            while playerObstacleCollision(app, move) == True:
-                move[1] += 1
+                # moves background (no up-down wrap around implemented yet)
+                app.backgroundImageY += move[1]
+                if app.backgroundImageY >= app.backgroundImageHeight:
+                    app.backgroundImageY = 0
+        elif ('down' in keys and app.gameOver == False and app.startMenu == False):
+                move = [0, -15]
+                while playerObstacleCollision(app, move) == True:
+                    move[1] += 1
 
-            for enemy in app.enemyDict:
-                app.enemyDict[enemy][1] += move[1]
-            for obstacle in app.obstacleDict:
-                app.obstacleDict[obstacle][1] += move[1]
-            for projectile in app.projectileDict:
-                app.projectileDict[projectile][1] += move[1]
-            
-            app.shadowCounter -= move[1]
-            app.forwardCounter += move[1]
+                for enemy in app.enemyDict:
+                    app.enemyDict[enemy][1] += move[1]
+                for obstacle in app.obstacleDict:
+                    app.obstacleDict[obstacle][1] += move[1]
+                for projectile in app.projectileDict:
+                    app.projectileDict[projectile][1] += move[1]
+                
+                app.shadowCounter -= move[1]
+                app.forwardCounter += move[1]
 
-            app.backgroundImageY += move[1]
-            if app.backgroundImageY <= -app.backgroundImageHeight:
-                app.backgroundImageY = 0
-    if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
-        if app.stepsPerSecond < 50:
-            app.stepsPerSecond += 2
+                app.backgroundImageY += move[1]
+                if app.backgroundImageY <= -app.backgroundImageHeight:
+                    app.backgroundImageY = 0
+        if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
+            if app.stepsPerSecond < 50:
+                app.stepsPerSecond += 2
 
 def drawEnemy(app):
     for enemy in app.enemyDict:
