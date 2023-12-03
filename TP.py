@@ -143,7 +143,7 @@ def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True and app.gameOver == False:
         # makes sure the player is not paused
-        if app.stepsPerSecond != 10:
+        if app.stepsPerSecond > 10:
             app.spawnCounter += 1
 
             # spawns enemies, moreso as time moves on
@@ -182,6 +182,8 @@ def onStep(app):
         # checks for any collisions then removes the projectile and enemy
         playerEnemyProjectileCollision(app)
 
+        projectileProjectileCollision(app)
+
         enemyProjectileCollision(app)
 
         projectileObstacleCollision(app)
@@ -197,12 +199,13 @@ def onStep(app):
 # circle-circle collision
 def enemyProjectileCollision(app):
     enemyDict = app.enemyDict.copy()
-    projectileDict = app.projectileDict.copy()
     for enemy in enemyDict:
+        projectileDict = app.projectileDict.copy()
         for projectile in projectileDict:
-            print(projectile)
             if (distance(enemyDict[enemy][0], enemyDict[enemy][1], projectileDict[projectile][0], projectileDict[projectile][1]) 
                 <= enemy.size + projectile.size):
+                print(projectile)
+                print(app.projectileDict)
                 enemy.health -= projectile.damage
                 if enemy.health == 0:
                     app.enemyDict.pop(enemy)
@@ -212,8 +215,9 @@ def enemyProjectileCollision(app):
                         app.score += 3
                     else:
                         app.score += 1
-                print(app.projectileDict)
                 app.projectileDict.pop(projectile)
+                # break out of loop to recalculate projectiles since enemies can overlap
+                break
 
 # vector calculation using dot product
 # source: https://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points
@@ -481,15 +485,15 @@ def removeObjects(app):
     projectileDict = app.projectileDict.copy()
     for projectile in projectileDict:
         # remove player projectiles that move off screen
-        if projectileDict[projectile][1] < -10:
+        if projectileDict[projectile][1] < 0:
             app.projectileDict.pop(projectile)
 
     enemyDict = app.enemyDict.copy()
     for enemy in enemyDict:
-        # removes enemies that are 300 pixels offscreen behind or 600 pixels right or left
-        if app.enemyDict[enemy][1] > 900:
+        # removes enemies that are 100 pixels offscreen behind, right or left
+        if app.enemyDict[enemy][1] > 700:
             app.enemyDict.pop(enemy)
-        elif app.enemyDict[enemy][0] > 1200 or app.enemyDict[enemy][0] < -600:
+        elif app.enemyDict[enemy][0] > 700 or app.enemyDict[enemy][0] < -100:
             app.enemyDict.pop(enemy)
         # removes enemies that get caught by the shadow
         elif app.enemyDict[enemy][1] >= app.height - app.shadowCounter:
