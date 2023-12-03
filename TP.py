@@ -147,8 +147,8 @@ def onStep(app):
             app.spawnCounter += 1
 
             # spawns enemies, moreso as time moves on
-            if app.forwardCounter < 4000:
-                enemySpawnRate = 5 - app.forwardCounter // 1000
+            if app.forwardCounter < 8000:
+                enemySpawnRate = 5 - app.forwardCounter // 2000
             else:
                 enemySpawnRate = 1
             if app.spawnCounter % enemySpawnRate == 0:
@@ -165,8 +165,8 @@ def onStep(app):
             moveProjectiles(app)
 
             # spawns obstacles, moreso as time moves on
-            if app.forwardCounter < 6000:
-                obstacleSpawnRate = 30 - app.forwardCounter // 300
+            if app.forwardCounter < 12000:
+                obstacleSpawnRate = 30 - app.forwardCounter // 600
             else:
                 obstacleSpawnRate = 10
             if app.spawnCounter % obstacleSpawnRate == 0:
@@ -368,18 +368,30 @@ def playerSuicide(app):
                 return True
     return False
 
+def projectileProjectileCollision(app):
+    projectileDict1 = app.projectileDict.copy()
+    projectileDict2 = app.projectileDict.copy()
+    for projectile1 in projectileDict1:
+        for projectile2 in projectileDict2:
+            if projectile1 != projectile2:
+                if (distance(projectileDict1[projectile1][0], projectileDict1[projectile1][1], 
+                            projectileDict2[projectile2][0], projectileDict2[projectile2][1]) 
+                    <= projectile1.size + projectile2.size):
+                    app.projectileDict.pop(projectile1)
+                    app.projectileDict.pop(projectile2)
+
 def createNewEnemies(app):
     # twice as likely to spawn enemies that move down
     directions = [(1, 0), (-1, 0), (0, 1), (0, 1)]
     # 30% chance of special enemy spawning
     num = random.randint(1, 20)
+    follow = False
     shoot = False
-    if num <= 15:
-        follow = False
-    else:
-        follow = True
-        if num == 20:
-            shoot = True
+    # spawn different harder enemies as player progresses
+    if app.forwardCounter >= 1000 and num >= 15:
+            follow = True
+            if num == 20 and app.forwardCounter >= 2000:
+                shoot = True
     newEnemy = Enemy(1, 15, random.choice(directions), follow, shoot)
     return newEnemy
 
