@@ -670,7 +670,7 @@ def drawTutorialMenu(app):
     drawLabel("You can't move through rocks", 300, 300, size = 30, fill = 'white', font = 'Impact')
     drawLabel('Move forward and kill enemies to gain points', 300, 350, size = 30, fill = 'white', font = 'Impact')
     drawLabel("NOW HAVE FUN", 300, 450, size = 60, fill = 'white', font = 'Impact')
-    drawLabel("AND DONT GET CAUGHT BY THE SHADOW", 300, 550, size = 30, fill = 'red', font = 'Impact')
+    drawLabel("AND... DONT GET CAUGHT BY THE SHADOW", 300, 550, size = 36, fill = 'red', font = 'Impact')
 
 def drawMenu(app):
     drawLabel('Time Locker: 112 Edition', 300, 150, size = 54, fill = 'white', font = 'Impact')
