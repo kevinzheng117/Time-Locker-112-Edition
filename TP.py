@@ -88,6 +88,9 @@ def newGame(app):
     app.backgroundImageHeight =  app.backgroundImage.height
     app.backgroundImage = CMUImage(app.backgroundImage)
 
+    # source: https://www.theappguruz.com/app/uploads/2015/06/3d-view-to-your-stones.png
+    app.obstacleImage = Image.open("Images/obstacle.png")
+
     # source: https://openclipart.org/detail/215080/retro-character-sprite-sheet
     playerSpritestrip = Image.open('Images/player sprite.png')
     newPlayerWidth, newPlayerHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height * 10 // 98)
@@ -633,8 +636,10 @@ def drawEnemy(app):
 
 def drawObstacle(app):
     for obstacle in app.obstacleDict:
-        drawRect(app.obstacleDict[obstacle][0], app.obstacleDict[obstacle][1], 
-                 obstacle.size, obstacle.size, fill = 'green')
+        obstacleImageWidth, obstacleImageHeight = obstacle.size, obstacle.size
+        obstacleImage = app.obstacleImage.resize((obstacleImageWidth, obstacleImageHeight))
+        obstacleImage = CMUImage(obstacleImage) 
+        drawImage(obstacleImage, app.obstacleDict[obstacle][0], app.obstacleDict[obstacle][1])
 
 def drawProjectile(app):
     for projectile in app.projectileDict:
