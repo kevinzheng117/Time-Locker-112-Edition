@@ -699,7 +699,7 @@ def drawPlayer(app):
     sprite = app.playerSprites[app.playerSpriteCounter]
     drawImage(sprite, 280.5, 275)
 
-# could be used for debugging
+# could be used for debugging; draws the irregular polygon around the player
 def drawPlayerBox(app):
     for i in range(len(app.coordinates)):
         if i < len(app.coordinates) - 1:
