@@ -65,6 +65,7 @@ def newGame(app):
     app.width = 600
     app.height = 600
     app.startMenu = True
+    app.tutorial = False
     app.stepsPerSecond = 10
     app.gameOver = False
     app.player = Player(25, 300, 300)
@@ -534,17 +535,21 @@ def checkShadow(app):
     if app.shadowCounter >= app.player.y:
         app.gameOver = True
 
-def onMousePress(app, mouseX, mouseY):
+def onKeyPress(app, key):
     if app.gameOver == True:
-        if mouseX != None:
+        if key != None:
             newGame(app)
             app.gameOver = False
     elif app.startMenu == True:
-        if mouseX != None:
+        if key == 't':
+            app.tutorial = True
+        else:
+            app.tutorial = False
             app.startMenu = False
+        
 
 def onKeyRelease(app, key):
-    if key in {'right', 'left', 'up', 'down'}:
+    if key != None:
         app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):
@@ -620,7 +625,7 @@ def onKeyHold(app, keys):
             app.backgroundImageY += move[1]
             if app.backgroundImageY <= -app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
+    if ('right' or 'left' or 'up' or 'down' in keys) and app.gameOver == False:
         if app.stepsPerSecond < 70:
             app.stepsPerSecond += 2
 
@@ -651,13 +656,25 @@ def drawShadow(app):
     if app.shadowCounter > 0:
         drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter, fill = 'red')
 
+def drawTutorialMenu(app):
+    drawLabel('CONTROLS:', 300, 100, size = 40, fill = 'white', font = 'Impact')
+    drawLabel('Use arrow keys to move around', 300, 150, size = 30, fill = 'white', font = 'Impact')
+    drawLabel('Hold them to speed up time', 300, 200, size = 30, fill = 'white', font = 'Impact')
+    drawLabel('You shoot fireballs when you move', 300, 250, size = 30, fill = 'white', font = 'Impact')
+    drawLabel("You can't move through rocks", 300, 300, size = 30, fill = 'white', font = 'Impact')
+    drawLabel('Move forward and kill enemies to gain points', 300, 350, size = 30, fill = 'white', font = 'Impact')
+    drawLabel("NOW HAVE FUN", 300, 450, size = 60, fill = 'red', font = 'Impact')
+    drawLabel("AND DONT DIE", 300, 550, size = 60, fill = 'red', font = 'Impact')
+
 def drawMenu(app):
-    drawLabel('Time Locker: 112 Edition', 300, 150, size = 36, fill = 'white', font = 'Impact')
-    drawLabel('Press mouse anywhere to start!', 300, 400, size = 24, fill = 'white', font = 'Impact')
+    drawLabel('Time Locker: 112 Edition', 300, 150, size = 54, fill = 'white', font = 'Impact')
+    drawLabel('Press any key to start!', 300, 400, size = 30, fill = 'white', font = 'Impact')
+    drawLabel('Press t for tutorial menu.', 300, 475, size = 30, fill = 'white', font = 'Impact')
 
 def drawGameOver(app):
-    drawLabel(f'SCORE: {app.score}', 300, 300, size = 36, fill = 'white', font = 'Impact')
-    drawLabel('Press mouse anywhere to go back to menu!', 300, 400, size = 18, fill = 'white', font = 'Impact')
+    drawLabel(f'HIGH SCORE: {app.highScore}', 300, 200, size = 40, fill = 'red', font = 'Impact')
+    drawLabel(f'SCORE: {app.score}', 300, 300, size = 60, fill = 'white', font = 'Impact')
+    drawLabel('Press any key to go back to menu!', 300, 400, size = 30, fill = 'white', font = 'Impact')
 
 def drawPlayerScore(app):
     drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20, fill = 'white', font = 'Impact')
@@ -690,22 +707,22 @@ def drawBackground(app):
                          
 def redrawAll(app):
     if app.gameOver == False:
-        # want player and background to appear in the start menu
         drawBackground(app)
-        drawPlayer(app)
-        # for debugging: drawPlayerBox(app)
-
-        # draw start menu
-        if app.startMenu == True:
-            drawMenu(app)
+        if app.tutorial == True:
+            drawTutorialMenu(app)
         else:
-            drawPlayerScore(app)
-            drawEnemy(app)
-            drawProjectile(app)
-            drawObstacle(app)
-            drawShadow(app)
-            drawScoreLine(app)
-        
+            # want player to appear in the start menu
+            drawPlayer(app)
+            # draw start menu
+            if app.startMenu == True:
+                drawMenu(app)
+            else:
+                drawPlayerScore(app)
+                drawEnemy(app)
+                drawProjectile(app)
+                drawObstacle(app)
+                drawShadow(app)
+                drawScoreLine(app)
     else:
         drawBackground(app)
         drawGameOver(app)
