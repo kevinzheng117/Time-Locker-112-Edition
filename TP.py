@@ -652,25 +652,25 @@ def drawShadow(app):
         drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter, fill = 'red')
 
 def drawMenu(app):
-    drawLabel('Time Locker: 112 Edition', 300, 150, size = 36, fill = 'white')
-    drawLabel('Press mouse anywhere to start!', 300, 400, size = 24, fill = 'white')
+    drawLabel('Time Locker: 112 Edition', 300, 150, size = 36, fill = 'white', font = 'Impact')
+    drawLabel('Press mouse anywhere to start!', 300, 400, size = 24, fill = 'white', font = 'Impact')
 
 def drawGameOver(app):
-    drawLabel(f'SCORE: {app.score}', 300, 300, size = 36, fill = 'white')
-    drawLabel('Press mouse anywhere to go back to menu!', 300, 400, size = 18, fill = 'white')
+    drawLabel(f'SCORE: {app.score}', 300, 300, size = 36, fill = 'white', font = 'Impact')
+    drawLabel('Press mouse anywhere to go back to menu!', 300, 400, size = 18, fill = 'white', font = 'Impact')
 
 def drawPlayerScore(app):
-    drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20, fill = 'white')
-    drawLabel(f'Score: {app.score}', 50, 50, size = 20, fill = 'white')
+    drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20, fill = 'white', font = 'Impact')
+    drawLabel(f'Score: {app.score}', 50, 50, size = 20, fill = 'white', font = 'Impact')
 
 def drawScoreLine(app):
     if (app.forwardCounter % 2000 >= 0 and 
         app.forwardCounter % 2000 <= 300 and
         app.forwardCounter // 2000 >= app.nextScoreLine // 2000):
         drawLine(0, app.forwardCounter % 2000, 550, app.forwardCounter % 2000,
-                 dashes = True, fill = 'white')
-        drawRect(550, app.forwardCounter % 2000 - 15, 50, 30, fill = None, border = 'white')
-        drawLabel('+10', 575, app.forwardCounter % 2000, size = 12, fill = 'white')
+                 dashes = True, fill = 'white', lineWidth = 5)
+        drawRect(550, app.forwardCounter % 2000 - 15, 50, 30, fill = None, border = 'white', borderWidth = 5)
+        drawLabel('+10', 575, app.forwardCounter % 2000, size = 12, bold = True, fill = 'white')
 
 def drawPlayer(app):
     sprite = app.playerSprites[app.playerSpriteCounter]
