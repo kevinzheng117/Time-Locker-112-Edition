@@ -234,6 +234,8 @@ def onStep(app):
 
         checkShadow(app)
 
+# functions called in onStep start HERE:
+
 # circle-circle collision
 def enemyProjectileCollision(app):
     # cannot modify dictionary while iterating over it
@@ -535,6 +537,8 @@ def checkShadow(app):
     if app.shadowCounter >= app.player.y:
         app.gameOver = True
 
+# controller functions start HERE:
+
 def onKeyPress(app, key):
     if app.gameOver == True:
         if key != None:
@@ -628,6 +632,8 @@ def onKeyHold(app, keys):
     if ('right' or 'left' or 'up' or 'down' in keys) and app.gameOver == False:
         if app.stepsPerSecond < 70:
             app.stepsPerSecond += 2
+
+# view functions start HERE:
 
 def drawEnemy(app):
     for enemy in app.enemyDict:
