@@ -90,8 +90,8 @@ def newGame(app):
 
     # source: https://openclipart.org/detail/215080/retro-character-sprite-sheet
     playerSpritestrip = Image.open('Images/player sprite.png')
-    newWidth, newHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height*10 // 98)
-    playerSpritestrip = playerSpritestrip.resize((newWidth, newHeight))
+    newPlayerWidth, newPlayerHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height * 10 // 98)
+    playerSpritestrip = playerSpritestrip.resize((newPlayerWidth, newPlayerHeight))
     app.playerScaleFactor = 9.8
 
     app.playerSprites = [ ]
@@ -101,6 +101,40 @@ def newGame(app):
                                                 (383 + 383 * i)/app.playerScaleFactor,
                                                 2000/app.playerScaleFactor)))
         app.playerSprites.append(sprite)
+    
+    # source: https://i.pinimg.com/474x/d3/16/1e/d3161e7bf2a973f9128f7ddd5feb5021.jpg
+    enemySpritestrip = Image.open('Images/enemy sprite.png')
+    newEnemyWidth, newEnemyHeight = (enemySpritestrip.width // 3 * 2, enemySpritestrip.height // 3 * 2)
+    enemySpritestrip = enemySpritestrip.resize((newEnemyWidth, newEnemyHeight))
+
+    app.greenEnemySprites = []
+    app.orangeEnemySprites = []
+    app.redEnemySprites = []
+    for i in range(3):
+        sprite1 = CMUImage(enemySpritestrip.crop(((38 + 64 * 0) // 3 * 2, (126 + 56 * i) // 3 * 2, (102 + 64 * 0) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
+        sprite2 = CMUImage(enemySpritestrip.crop(((38 + 64 * 1) // 3 * 2, (126 + 56 * i) // 3 * 2, (102 + 64 * 1) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
+        sprite3 = CMUImage(enemySpritestrip.crop(((38 + 64 * 2) // 3 * 2, (126 + 56 * i) // 3 * 2, (102 + 64 * 2) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
+        sprite4 = CMUImage(enemySpritestrip.crop(((226) // 3 * 2, (126 + 56 * i) // 3 * 2, (226 + 60) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
+        sprite5 = CMUImage(enemySpritestrip.crop(((304) // 3 * 2, (126 + 56 * i) // 3 * 2, (304 + 60) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
+        if i == 0:
+            app.greenEnemySprites.append(sprite1)
+            app.greenEnemySprites.append(sprite2)
+            app.greenEnemySprites.append(sprite3)
+            app.greenEnemySprites.append(sprite4)
+            app.greenEnemySprites.append(sprite5)
+        elif i == 1:
+            app.orangeEnemySprites.append(sprite1)
+            app.orangeEnemySprites.append(sprite2)
+            app.orangeEnemySprites.append(sprite3)
+            app.orangeEnemySprites.append(sprite4)
+            app.orangeEnemySprites.append(sprite5)
+        elif i == 2:
+            app.redEnemySprites.append(sprite1)
+            app.redEnemySprites.append(sprite2)
+            app.redEnemySprites.append(sprite3)
+            app.redEnemySprites.append(sprite4)
+            app.redEnemySprites.append(sprite5)
+
     
     # source: https://img.itch.zone/aW1hZ2UvOTQxMTM5LzgyNjc1MjkuZ2lm/original/XziAqG.gif
     bulletGif = Image.open('Images/bullet.gif')
@@ -117,6 +151,7 @@ def newGame(app):
 
     # for all sprites
     app.playerSpriteCounter = 0
+    app.enemySpriteCounter = 0
     app.bulletSpriteCounter = 0
 
     # coordinates to irregular polygon; written in a separate file so dimensions are different
@@ -174,10 +209,11 @@ def onStep(app):
 
             # move sprites
             app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
+            app.enemySpriteCounter = (1 + app.enemySpriteCounter) % len(app.greenEnemySprites)
             app.bulletSpriteCounter = (1 + app.bulletSpriteCounter) % len(app.bulletSprites)
 
         # shadow should have constant speed regardless of game time
-        app.shadowCounter += 50 / app.stepsPerSecond 
+        app.shadowCounter += 75 / app.stepsPerSecond 
 
         # checks for any collisions then removes the projectile and enemy
         playerEnemyProjectileCollision(app)
@@ -581,19 +617,18 @@ def onKeyHold(app, keys):
             if app.backgroundImageY <= -app.backgroundImageHeight:
                 app.backgroundImageY = 0
     if 'right' or 'left' or 'up' or 'down' in keys and app.gameOver == False:
-        if app.stepsPerSecond < 50:
+        if app.stepsPerSecond < 70:
             app.stepsPerSecond += 2
 
 def drawEnemy(app):
     for enemy in app.enemyDict:
         if enemy.follow == True and enemy.shoot == True:
-            color = 'purple'
+            sprite = app.redEnemySprites[app.enemySpriteCounter]
         elif enemy.follow == True:
-            color = 'red'
+            sprite = app.orangeEnemySprites[app.enemySpriteCounter]
         else:
-            color = 'deepPink'
-
-        drawCircle(app.enemyDict[enemy][0], app.enemyDict[enemy][1], enemy.size, fill = color)
+            sprite = app.greenEnemySprites[app.enemySpriteCounter]
+        drawImage(sprite, app.enemyDict[enemy][0] - 40 // 3 * 2, app.enemyDict[enemy][1] - 20 // 3 * 2)
 
 def drawObstacle(app):
     for obstacle in app.obstacleDict:
