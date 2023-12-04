@@ -531,19 +531,20 @@ def checkShadow(app):
     if app.shadowCounter >= app.player.y:
         app.gameOver = True
 
+def onMousePress(app, mouseX, mouseY):
+    if app.gameOver == True:
+        if mouseX != None:
+            newGame(app)
+            app.gameOver = False
+    elif app.startMenu == True:
+        if mouseX != None:
+            app.startMenu = False
+
 def onKeyRelease(app, key):
     if key in {'right', 'left', 'up', 'down'}:
         app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):
-    app.step = 0
-    if app.gameOver == True:
-        if len(keys) != 0:
-            newGame(app)
-            app.gameOver = False
-    elif app.startMenu == True:
-        if len(keys) != 0:
-            app.startMenu = False
     if ('right' in keys and app.gameOver == False and app.startMenu == False):
             # modify the amount the player moves so there is no overlap with obstacles
             move = [-15, 0]
@@ -643,15 +644,15 @@ def drawProjectile(app):
 
 def drawShadow(app):
     if app.shadowCounter > 0:
-        drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter)
+        drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter, fill = 'red')
 
 def drawMenu(app):
     drawLabel('Time Locker: 112 Edition', 300, 150, size = 36, fill = 'white')
-    drawLabel('Press any key to start!', 300, 400, size = 24, fill = 'white')
+    drawLabel('Press mouse anywhere to start!', 300, 400, size = 24, fill = 'white')
 
 def drawGameOver(app):
     drawLabel(f'SCORE: {app.score}', 300, 300, size = 36, fill = 'white')
-    drawLabel('Press any key to go back to menu!', 300, 400, size = 18, fill = 'white')
+    drawLabel('Press mouse anywhere to go back to menu!', 300, 400, size = 18, fill = 'white')
 
 def drawPlayerScore(app):
     drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20, fill = 'white')
