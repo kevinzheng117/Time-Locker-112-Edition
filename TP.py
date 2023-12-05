@@ -574,6 +574,15 @@ def checkShadow(app):
 
 # controller functions start HERE:
 
+# prevents screen resizing so things work correctly
+def onResize(app):
+    if app.width == 600 and app.height == 600:
+        return None
+    elif app.height != 600:
+        app.height = 600
+    elif app.width != 600:
+        app.width = 600
+
 def onKeyPress(app, key):
     if app.gameOver == True:
         if key != None:
@@ -584,8 +593,7 @@ def onKeyPress(app, key):
             app.tutorial = True
         else:
             app.tutorial = False
-            app.startMenu = False
-        
+            app.startMenu = False     
 
 def onKeyRelease(app, key):
     if key != None:
