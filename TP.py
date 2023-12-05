@@ -501,7 +501,7 @@ def moveProjectiles(app):
 
 def crossScoreLine(app):
     if app.forwardCounter == app.nextScoreLine:
-        app.score += 10
+        app.score += 20
         app.nextScoreLine += 2000
 
 def updateHighScore(app):
@@ -758,7 +758,7 @@ def drawScoreLine(app):
                  dashes = True, fill = 'white', lineWidth = 5)
         drawRect(550, app.forwardCounter % 2000 - 15, 50, 30, fill = None, 
                  border = 'white', borderWidth = 5)
-        drawLabel('+10', 575, app.forwardCounter % 2000, size = 12, bold = True, 
+        drawLabel('+20', 575, app.forwardCounter % 2000, size = 12, bold = True, 
                   fill = 'white')
 
 def drawPlayer(app):
