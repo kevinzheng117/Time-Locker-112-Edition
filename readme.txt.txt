@@ -27,7 +27,10 @@ Libraries: N/A
 
 Shortcut commands: 'f' - increase rate enemy and obstacle generation as well as
 unlock harder enemies that have not been unlocked (in the case the game is too 
-hard and the user never reaches the harder enemies).
+hard and the user never reaches the harder enemies). Note that this command
+breaks the scoreLine system since the game assumes the player has progressed 
+further in the game then they actually have. Therefore, the player does not gain
+points for moving past distances they have already done so.
 Other features can all be easily accessed by simply playing the game.
 
 Fonts: N/A (uses the font Impact which should already be on Windows and Mac)
