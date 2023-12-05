@@ -599,9 +599,9 @@ def onKeyPress(app, key):
         else:
             app.tutorial = False
             app.startMenu = False 
-    # shortcut key for maximum enemy and obstacle generation
+    # shortcut key for increasing enemy and obstacle generation
     if key == 'f':
-        app.forwardCounter = 12000    
+        app.forwardCounter += 2000    
 
 def onKeyRelease(app, key):
     if key != None:
