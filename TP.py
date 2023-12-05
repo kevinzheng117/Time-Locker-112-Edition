@@ -743,8 +743,8 @@ def drawMenu(app):
 
 def drawGameOver(app):
     if app.newHighScore:
-        drawLabel(f'NEW HIGH SCORE: {app.highScore}!!!', 300, 300, size = 60, fill = 'white', 
-              font = 'Impact')
+        drawLabel(f'NEW HIGH SCORE: {app.highScore}!!!', 300, 300, size = 60, 
+                  fill = 'white', font = 'Impact')
     else:
         drawLabel(f'HIGH SCORE: {app.highScore}', 300, 200, size = 40, 
                 fill = 'white', font = 'Impact')
