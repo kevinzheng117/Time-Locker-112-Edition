@@ -25,7 +25,9 @@ user should not modify that folder in any way.
 
 Libraries: N/A
 
-Shortcut commands: None, since the player can access all features of the game
-easily by playing it.
+Shortcut commands: 'f' - increase rate enemy and obstacle generation as well as
+unlock harder enemies that have not been unlocked (in the case the game is too 
+hard and the user never reaches the harder enemies).
+Other features can all be easily accessed by simply playing the game.
 
 Fonts: N/A (uses the font Impact which should already be on Windows and Mac)
