@@ -80,6 +80,7 @@ def newGame(app):
     app.backgroundImageX = 0
     app.backgroundImageY = 0
     app.newHighScore = False
+    app.pause = False
 
     ''' 
     source: https://images.fineartamerica.com/images/artworkimages/mediumlarge
@@ -202,62 +203,63 @@ def onAppStart(app):
 def onStep(app):
     # everything starts as paused since player hasn't moved
     if app.startMenu != True and app.gameOver == False:
-        # makes sure the player is not paused
-        if app.stepsPerSecond > 10:
-            app.spawnCounter += 1
+        if app.pause == False:
+            # makes sure the player is not paused
+            if app.stepsPerSecond > 10:
+                app.spawnCounter += 1
 
-            # spawns enemies, moreso as time moves on
-            if app.forwardCounter < 8000:
-                enemySpawnRate = 5 - app.forwardCounter // 2000
-            else:
-                enemySpawnRate = 1
-            if app.spawnCounter % enemySpawnRate == 0:
-                spawnEnemies(app)
+                # spawns enemies, moreso as time moves on
+                if app.forwardCounter < 8000:
+                    enemySpawnRate = 5 - app.forwardCounter // 2000
+                else:
+                    enemySpawnRate = 1
+                if app.spawnCounter % enemySpawnRate == 0:
+                    spawnEnemies(app)
 
-            moveEnemies(app)
+                moveEnemies(app)
 
-            if app.spawnCounter % 2 == 0:
-                spawnPlayerProjectiles(app)
+                if app.spawnCounter % 2 == 0:
+                    spawnPlayerProjectiles(app)
 
-            if app.spawnCounter % 15 == 0:
-                spawnEnemyProjectiles(app)
-            
-            moveProjectiles(app)
+                if app.spawnCounter % 15 == 0:
+                    spawnEnemyProjectiles(app)
+                
+                moveProjectiles(app)
 
-            # spawns obstacles, moreso as time moves on
-            if app.forwardCounter < 12000:
-                obstacleSpawnRate = 30 - app.forwardCounter // 600
-            else:
-                obstacleSpawnRate = 10
-            if app.spawnCounter % obstacleSpawnRate == 0:
-                spawnObstacles(app)
+                # spawns obstacles, moreso as time moves on
+                if app.forwardCounter < 12000:
+                    obstacleSpawnRate = 30 - app.forwardCounter // 600
+                else:
+                    obstacleSpawnRate = 10
+                if app.spawnCounter % obstacleSpawnRate == 0:
+                    spawnObstacles(app)
 
-            # move sprites
-            app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
-            app.enemySpriteCounter = (1 + app.enemySpriteCounter) % len(app.greenEnemySprites)
-            app.bulletSpriteCounter = (1 + app.bulletSpriteCounter) % len(app.bulletSprites)
+                # move sprites
+                app.playerSpriteCounter = (1 + app.playerSpriteCounter) % len(app.playerSprites)
+                app.enemySpriteCounter = (1 + app.enemySpriteCounter) % len(app.greenEnemySprites)
+                app.bulletSpriteCounter = (1 + app.bulletSpriteCounter) % len(app.bulletSprites)
 
-        # shadow should have constant speed regardless of game time
-        app.shadowCounter += 75 / app.stepsPerSecond 
+            # shadow should have constant speed regardless of game time
+            app.shadowCounter += 75 / app.stepsPerSecond 
 
-        # checks for any collisions then removes the projectile and enemy
-        playerEnemyProjectileCollision(app)
+            # checks for any collisions then removes the projectile and enemy
+            playerEnemyProjectileCollision(app)
 
-        enemyProjectileCollision(app)
+            enemyProjectileCollision(app)
 
-        projectileObstacleCollision(app)
+            projectileObstacleCollision(app)
 
-        crossScoreLine(app)
+            crossScoreLine(app)
 
-        updateHighScore(app)
+            updateHighScore(app)
 
-        removeObjects(app)
+            removeObjects(app)
 
-        checkShadow(app)
+            checkShadow(app)
 
-        # keeps track whether or not player achieved new high score in the round
-        if app.score >= app.highScore:
-            app.newHighScore = True
+            # keeps track whether or not player achieved new high score in the round
+            if app.score >= app.highScore:
+                app.newHighScore = True
 
 # functions called in onStep start HERE:
 
@@ -598,17 +600,22 @@ def onKeyPress(app, key):
             app.tutorial = True
         else:
             app.tutorial = False
-            app.startMenu = False 
-    # shortcut key for increasing enemy and obstacle generation
-    if key == 'f':
-        app.forwardCounter += 2000    
+            app.startMenu = False
+    elif app.startMenu == False:
+        # shortcut key for increasing enemy and obstacle generation
+        if key == 'f':
+            app.forwardCounter += 2000
+        elif key == 'p':
+            app.pause = not app.pause
+
 
 def onKeyRelease(app, key):
     if key != None:
         app.stepsPerSecond = 10
 
 def onKeyHold(app, keys):
-    if ('right' in keys and app.gameOver == False and app.startMenu == False):
+    if ('right' in keys and app.gameOver == False and app.startMenu == False and
+        app.pause == False):
             # modify the amount the player moves so there is no overlap with obstacles
             move = [-15, 0]
             # every time the player collides with obstacle, lower increment of move
@@ -626,7 +633,8 @@ def onKeyHold(app, keys):
             app.backgroundImageX += move[0]
             if app.backgroundImageX <= -app.backgroundImageWidth:
                 app.backgroundImageX = 0
-    elif ('left' in keys and app.gameOver == False and app.startMenu == False):
+    elif ('left' in keys and app.gameOver == False and app.startMenu == False and
+          app.pause == False):
             move = [15, 0]
             while playerObstacleCollision(app, move) == True:
                 move[0] -= 1
@@ -642,7 +650,7 @@ def onKeyHold(app, keys):
             if app.backgroundImageX >= app.backgroundImageWidth:
                 app.backgroundImageX = 0
     elif ('up' in keys and app.gameOver == False and app.startMenu == False and 
-          playerSuicide(app) == False):
+          playerSuicide(app) == False and app.pause == False):
             move = [0, 15]
             while playerObstacleCollision(app, move) == True:
                 move[1] -= 1
@@ -662,7 +670,8 @@ def onKeyHold(app, keys):
             app.backgroundImageY += move[1]
             if app.backgroundImageY >= app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    elif ('down' in keys and app.gameOver == False and app.startMenu == False):
+    elif ('down' in keys and app.gameOver == False and app.startMenu == False
+          and app.pause == False):
             move = [0, -15]
             while playerObstacleCollision(app, move) == True:
                 move[1] += 1
@@ -681,7 +690,7 @@ def onKeyHold(app, keys):
             if app.backgroundImageY <= -app.backgroundImageHeight:
                 app.backgroundImageY = 0
     if (('right' in keys or 'left' in keys or 'up' in keys or 'down' in keys) and 
-        app.gameOver == False):
+        app.gameOver == False and app.pause == False):
         # 70 should be around the maximum rate of stepsPerSecond (any increase beyond does not increase speed)
         if app.stepsPerSecond < 70:
             app.stepsPerSecond += 2
@@ -718,6 +727,11 @@ def drawShadow(app):
     if app.shadowCounter > 0:
         drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter, 
                  fill = 'red')
+        
+def drawPauseMenu(app):
+    drawLabel('PAUSED', 300, 100, size = 60, fill = 'white', font = 'Impact')
+    drawLabel(f'SCORE: {app.score}', 300, 500, size = 80, fill = 'white', 
+              font = 'Impact')
 
 def drawTutorialMenu(app):
     drawLabel('CONTROLS:', 300, 100, size = 40, fill = 'white', font = 'Impact')
@@ -809,6 +823,8 @@ def redrawAll(app):
                 drawScoreLine(app)
                 drawShadow(app)
                 drawPlayerScore(app)
+                if app.pause == True:
+                    drawPauseMenu(app)
     else:
         drawBackground(app)
         drawGameOver(app)
