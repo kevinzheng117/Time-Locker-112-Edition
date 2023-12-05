@@ -94,8 +94,10 @@ def newGame(app):
 
     # source: https://openclipart.org/detail/215080/retro-character-sprite-sheet
     playerSpritestrip = Image.open('Images/player sprite.png')
-    newPlayerWidth, newPlayerHeight = (playerSpritestrip.width * 10 // 98, playerSpritestrip.height * 10 // 98)
-    playerSpritestrip = playerSpritestrip.resize((newPlayerWidth, newPlayerHeight))
+    newPlayerWidth, newPlayerHeight = (playerSpritestrip.width * 10 // 98, 
+                                       playerSpritestrip.height * 10 // 98)
+    playerSpritestrip = playerSpritestrip.resize((newPlayerWidth, 
+                                                  newPlayerHeight))
     app.playerScaleFactor = 9.8
 
     app.playerSprites = [ ]
@@ -108,18 +110,36 @@ def newGame(app):
     
     # source: https://i.pinimg.com/474x/d3/16/1e/d3161e7bf2a973f9128f7ddd5feb5021.jpg
     enemySpritestrip = Image.open('Images/enemy sprite.png')
-    newEnemyWidth, newEnemyHeight = (enemySpritestrip.width // 3 * 2, enemySpritestrip.height // 3 * 2)
+    newEnemyWidth, newEnemyHeight = (enemySpritestrip.width // 3 * 2, 
+                                     enemySpritestrip.height // 3 * 2)
     enemySpritestrip = enemySpritestrip.resize((newEnemyWidth, newEnemyHeight))
 
     app.greenEnemySprites = []
     app.orangeEnemySprites = []
     app.redEnemySprites = []
+    # for loop used to create 3 different sprites from one image
     for i in range(3):
-        sprite1 = CMUImage(enemySpritestrip.crop(((38 + 64 * 0) // 3 * 2, (126 + 56 * i) // 3 * 2, (102 + 64 * 0) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
-        sprite2 = CMUImage(enemySpritestrip.crop(((38 + 64 * 1) // 3 * 2, (126 + 56 * i) // 3 * 2, (102 + 64 * 1) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
-        sprite3 = CMUImage(enemySpritestrip.crop(((38 + 64 * 2) // 3 * 2, (126 + 56 * i) // 3 * 2, (102 + 64 * 2) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
-        sprite4 = CMUImage(enemySpritestrip.crop(((226) // 3 * 2, (126 + 56 * i) // 3 * 2, (226 + 60) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
-        sprite5 = CMUImage(enemySpritestrip.crop(((304) // 3 * 2, (126 + 56 * i) // 3 * 2, (304 + 60) // 3 * 2, (126 + 56 * (i + 1)) // 3 * 2)))
+        # these sprites had to be manually cropped because of difference spacings in the image
+        sprite1 = CMUImage(enemySpritestrip.crop(((38 + 64 * 0) // 3 * 2, 
+                                                  (126 + 56 * i) // 3 * 2, 
+                                                  (102 + 64 * 0) // 3 * 2, 
+                                                  (126 + 56 * (i + 1)) // 3 * 2)))
+        sprite2 = CMUImage(enemySpritestrip.crop(((38 + 64 * 1) // 3 * 2, 
+                                                  (126 + 56 * i) // 3 * 2, 
+                                                  (102 + 64 * 1) // 3 * 2, 
+                                                  (126 + 56 * (i + 1)) // 3 * 2)))
+        sprite3 = CMUImage(enemySpritestrip.crop(((38 + 64 * 2) // 3 * 2, 
+                                                  (126 + 56 * i) // 3 * 2, 
+                                                  (102 + 64 * 2) // 3 * 2, 
+                                                  (126 + 56 * (i + 1)) // 3 * 2)))
+        sprite4 = CMUImage(enemySpritestrip.crop(((226) // 3 * 2, 
+                                                  (126 + 56 * i) // 3 * 2, 
+                                                  (226 + 60) // 3 * 2, 
+                                                  (126 + 56 * (i + 1)) // 3 * 2)))
+        sprite5 = CMUImage(enemySpritestrip.crop(((304) // 3 * 2, 
+                                                  (126 + 56 * i) // 3 * 2, 
+                                                  (304 + 60) // 3 * 2, 
+                                                  (126 + 56 * (i + 1)) // 3 * 2)))
         if i == 0:
             app.greenEnemySprites.append(sprite1)
             app.greenEnemySprites.append(sprite2)
@@ -274,7 +294,8 @@ def angleCalc(app, p1, p2, p3):
 
     # angle in radians
     angle = math.acos((vectorA[0] * vectorB[0] + vectorA[1] * vectorB[1]) / 
-    (math.sqrt(vectorA[0] ** 2 + vectorA[1] ** 2) * math.sqrt(vectorB[0] ** 2 + vectorB[1] ** 2)))
+                      (math.sqrt(vectorA[0] ** 2 + vectorA[1] ** 2) * 
+                       math.sqrt(vectorB[0] ** 2 + vectorB[1] ** 2)))
 
     # convert to degrees
     angle *= 180 / math.pi
@@ -286,7 +307,8 @@ def distancePointToLine(line, point):
     p0 = point
     p1 = line[0]
     p2 = line[1]
-    d = abs((p2[0] - p1[0]) * (p1[1] - p0[1]) - (p1[0] - p0[0]) * (p2[1] - p1[1])) / distance(p1[0], p1[1], p2[0], p2[1]) 
+    d = abs(((p2[0] - p1[0]) * (p1[1] - p0[1]) - (p1[0] - p0[0]) * 
+             (p2[1] - p1[1])) / distance(p1[0], p1[1], p2[0], p2[1])) 
     return d
 
 '''
@@ -310,7 +332,8 @@ def playerEnemyProjectileCollision(app):
 
     for enemy in enemyDict:
         for i in range(len(app.angles)):
-            angle = angleCalc(app, (app.player.x, app.player.y), app.coordinates[0], enemyDict[enemy])
+            angle = angleCalc(app, (app.player.x, app.player.y), 
+                              app.coordinates[0], enemyDict[enemy])
             ''' 
             basically points to the right side of the line formed by the 180 degrees 
             point and p1 will have their angles changed to 180 to 360 degrees
@@ -327,7 +350,8 @@ def playerEnemyProjectileCollision(app):
 
     for projectile in projectileDict:
         for i in range(len(app.angles)):
-            angle = angleCalc(app, (app.player.x, app.player.y), app.coordinates[0], projectileDict[projectile])
+            angle = angleCalc(app, (app.player.x, app.player.y), 
+                              app.coordinates[0], projectileDict[projectile])
             if (projectileDict[projectile][0] >= p180[0] or 
                 projectileDict[projectile][0] >= app.coordinates[0][0] and 
                 projectileDict[projectile][1] <= app.coordinates[0][1]):
@@ -346,7 +370,8 @@ to see if they intersect with any side of rectangle
 def playerObstacleCollision(app, move):
     obstacleDict = app.obstacleDict.copy()
     for obstacle in obstacleDict:
-        obstacleDict[obstacle] = obstacleDict[obstacle][0] + move[0], obstacleDict[obstacle][1] + move[1]
+        obstacleDict[obstacle] = [obstacleDict[obstacle][0] + move[0], 
+                                  obstacleDict[obstacle][1] + move[1]]
 
         obstacleCenter = (obstacleDict[obstacle][0] + obstacle.size / 2, 
                           obstacleDict[obstacle][1] + obstacle.size / 2)
@@ -356,10 +381,14 @@ def playerObstacleCollision(app, move):
         for i in range(len(app.angles)):
             lineSegment = (app.coordinates[i], app.coordinates[i + 1])
 
-            obstacleRightTop = (obstacleDict[obstacle][0] + obstacle.size, obstacleDict[obstacle][1])
-            obstacleLeftBottom = (obstacleDict[obstacle][0], obstacleDict[obstacle][1] + obstacle.size)
-            obstacleRightBottom = (obstacleDict[obstacle][0] + obstacle.size, obstacleDict[obstacle][1] + obstacle.size)
-            verticesList = [obstacleLeftTop, obstacleRightTop, obstacleLeftBottom, obstacleRightBottom]
+            obstacleRightTop = (obstacleDict[obstacle][0] + obstacle.size, 
+                                obstacleDict[obstacle][1])
+            obstacleLeftBottom = (obstacleDict[obstacle][0], 
+                                  obstacleDict[obstacle][1] + obstacle.size)
+            obstacleRightBottom = (obstacleDict[obstacle][0] + obstacle.size, 
+                                   obstacleDict[obstacle][1] + obstacle.size)
+            verticesList = [obstacleLeftTop, obstacleRightTop, 
+                            obstacleLeftBottom, obstacleRightBottom]
             '''
             uses line segment intersection formula from
             source: https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
@@ -376,8 +405,10 @@ def playerObstacleCollision(app, move):
                     x4, y4 = verticesList[j]
                     if x3 == x4 or y3 == y4:
                         if ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)) != 0:
-                            t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
-                            u = ((x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4))
+                            t = (((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / 
+                                 ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)))
+                            u = (((x1 - x3) * (y1 - y2) - (y1 - y3) * (x1 - x2)) / 
+                                 ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)))
                         # to account for division by 0 when closest line segment and rectangle side are parallel
                         else:
                             u = -1
@@ -404,7 +435,8 @@ def projectileObstacleCollision(app):
             elif closestY > obstacleDict[obstacle][1] + obstacle.size:
                 closestY = obstacleDict[obstacle][1] + obstacle.size
 
-            if (distance(closestX, closestY, projectileDict[projectile][0], projectileDict[projectile][1]) <= projectile.size):
+            if (distance(closestX, closestY, projectileDict[projectile][0], 
+                         projectileDict[projectile][1]) <= projectile.size):
                 obstacle.health -= projectile.damage
                 if obstacle.health == 0:
                     app.obstacleDict.pop(obstacle)
@@ -414,7 +446,8 @@ def projectileObstacleCollision(app):
 def playerSuicide(app):
     for projectile in app.projectileDict:
         if projectile.direction == (0, -1):
-            if distance(app.projectileDict[projectile][0], app.projectileDict[projectile][1] + 15,
+            if distance(app.projectileDict[projectile][0], 
+                        app.projectileDict[projectile][1] + 15,
                         app.player.x, app.player.y) <= projectile.size + app.player.size:
                 return True
     return False
@@ -500,7 +533,8 @@ def spawnEnemies(app):
         app.enemyDict[createNewEnemies(app)] = [random.randint(0, 600), 0]
     
 def spawnPlayerProjectiles(app):
-    app.projectileDict[Projectile(7.5, 1, (0, -1))] = [app.player.x, app.player.y - app.player.size]
+    app.projectileDict[Projectile(7.5, 1, (0, -1))] = [app.player.x, 
+                                                       app.player.y - app.player.size]
 
 def spawnEnemyProjectiles(app):
     for enemy in app.enemyDict:
@@ -511,7 +545,8 @@ def spawnEnemyProjectiles(app):
             directionX /= magnitude
             directionY /= magnitude
             direction = (-directionX, -directionY)
-            app.projectileDict[Projectile(7.5, 1, direction)] = [app.enemyDict[enemy][0], app.enemyDict[enemy][1]]
+            app.projectileDict[Projectile(7.5, 1, direction)] = [app.enemyDict[enemy][0], 
+                                                                 app.enemyDict[enemy][1]]
 
 # speed game up by removing offscreen objects
 def removeObjects(app):
@@ -629,7 +664,8 @@ def onKeyHold(app, keys):
             app.backgroundImageY += move[1]
             if app.backgroundImageY <= -app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    if ('right' in keys or 'left' in keys or 'up' in keys or 'down' in keys) and app.gameOver == False:
+    if (('right' in keys or 'left' in keys or 'up' in keys or 'down' in keys) and 
+        app.gameOver == False):
         # 70 should be around the maximum rate of stepsPerSecond (any increase beyond does not increase speed)
         if app.stepsPerSecond < 70:
             app.stepsPerSecond += 2
@@ -644,14 +680,17 @@ def drawEnemy(app):
             sprite = app.orangeEnemySprites[app.enemySpriteCounter]
         else:
             sprite = app.greenEnemySprites[app.enemySpriteCounter]
-        drawImage(sprite, app.enemyDict[enemy][0] - 40 // 3 * 2, app.enemyDict[enemy][1] - 20 // 3 * 2)
+        drawImage(sprite, app.enemyDict[enemy][0] - 40 // 3 * 2, 
+                  app.enemyDict[enemy][1] - 20 // 3 * 2)
 
 def drawObstacle(app):
     for obstacle in app.obstacleDict:
         obstacleImageWidth, obstacleImageHeight = obstacle.size, obstacle.size
-        obstacleImage = app.obstacleImage.resize((obstacleImageWidth, obstacleImageHeight))
+        obstacleImage = app.obstacleImage.resize((obstacleImageWidth, 
+                                                  obstacleImageHeight))
         obstacleImage = CMUImage(obstacleImage) 
-        drawImage(obstacleImage, app.obstacleDict[obstacle][0], app.obstacleDict[obstacle][1])
+        drawImage(obstacleImage, app.obstacleDict[obstacle][0], 
+                  app.obstacleDict[obstacle][1])
 
 def drawProjectile(app):
     for projectile in app.projectileDict:
@@ -661,31 +700,47 @@ def drawProjectile(app):
 
 def drawShadow(app):
     if app.shadowCounter > 0:
-        drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter, fill = 'red')
+        drawRect(0, app.height - app.shadowCounter, app.width, app.shadowCounter, 
+                 fill = 'red')
 
 def drawTutorialMenu(app):
     drawLabel('CONTROLS:', 300, 100, size = 40, fill = 'white', font = 'Impact')
-    drawLabel('Use arrow keys to move around', 300, 150, size = 30, fill = 'white', font = 'Impact')
-    drawLabel('Hold them to speed up time', 300, 200, size = 30, fill = 'white', font = 'Impact')
-    drawLabel('You shoot fireballs when you move', 300, 250, size = 30, fill = 'white', font = 'Impact')
-    drawLabel("You can't move through rocks", 300, 300, size = 30, fill = 'white', font = 'Impact')
-    drawLabel('Move forward and kill enemies to gain points', 300, 350, size = 30, fill = 'white', font = 'Impact')
-    drawLabel("NOW HAVE FUN", 300, 450, size = 60, fill = 'white', font = 'Impact')
-    drawLabel("AND... DONT GET CAUGHT BY THE SHADOW", 300, 550, size = 36, fill = 'red', font = 'Impact')
+    drawLabel('Use arrow keys to move around', 300, 150, size = 30, 
+              fill = 'white', font = 'Impact')
+    drawLabel('Hold them to speed up time', 300, 200, size = 30, fill = 'white', 
+              font = 'Impact')
+    drawLabel('You shoot fireballs when you move', 300, 250, size = 30, 
+              fill = 'white', font = 'Impact')
+    drawLabel("You can't move through rocks", 300, 300, size = 30, 
+              fill = 'white', font = 'Impact')
+    drawLabel('Move forward and kill enemies to gain points', 300, 350, 
+              size = 30, fill = 'white', font = 'Impact')
+    drawLabel("NOW HAVE FUN", 300, 450, size = 60, fill = 'white', 
+              font = 'Impact')
+    drawLabel("AND... DONT GET CAUGHT BY THE SHADOW", 300, 550, size = 36, 
+              fill = 'red', font = 'Impact')
 
 def drawMenu(app):
-    drawLabel('Time Locker: 112 Edition', 300, 150, size = 54, fill = 'white', font = 'Impact')
-    drawLabel('Press any key to start!', 300, 400, size = 30, fill = 'white', font = 'Impact')
-    drawLabel("Press 't' for tutorial menu.", 300, 475, size = 30, fill = 'white', font = 'Impact')
+    drawLabel('Time Locker: 112 Edition', 300, 150, size = 54, fill = 'white', 
+              font = 'Impact')
+    drawLabel('Press any key to start!', 300, 400, size = 30, fill = 'white', 
+              font = 'Impact')
+    drawLabel("Press 't' for tutorial menu.", 300, 475, size = 30, 
+              fill = 'white', font = 'Impact')
 
 def drawGameOver(app):
-    drawLabel(f'HIGH SCORE: {app.highScore}', 300, 200, size = 40, fill = 'white', font = 'Impact')
-    drawLabel(f'SCORE: {app.score}', 300, 300, size = 60, fill = 'white', font = 'Impact')
-    drawLabel('Press any key to go back to menu!', 300, 400, size = 30, fill = 'white', font = 'Impact')
+    drawLabel(f'HIGH SCORE: {app.highScore}', 300, 200, size = 40, 
+              fill = 'white', font = 'Impact')
+    drawLabel(f'SCORE: {app.score}', 300, 300, size = 60, fill = 'white', 
+              font = 'Impact')
+    drawLabel('Press any key to go back to menu!', 300, 400, size = 30, 
+              fill = 'white', font = 'Impact')
 
 def drawPlayerScore(app):
-    drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20, fill = 'white', font = 'Impact')
-    drawLabel(f'Score: {app.score}', 50, 50, size = 20, fill = 'white', font = 'Impact')
+    drawLabel(f'HIGH: {app.highScore}', 50, 20, size = 20, fill = 'white', 
+              font = 'Impact')
+    drawLabel(f'Score: {app.score}', 50, 50, size = 20, fill = 'white', 
+              font = 'Impact')
 
 def drawScoreLine(app):
     if (app.forwardCounter % 2000 >= 0 and 
@@ -693,8 +748,10 @@ def drawScoreLine(app):
         app.forwardCounter // 2000 >= app.nextScoreLine // 2000):
         drawLine(0, app.forwardCounter % 2000, 550, app.forwardCounter % 2000,
                  dashes = True, fill = 'white', lineWidth = 5)
-        drawRect(550, app.forwardCounter % 2000 - 15, 50, 30, fill = None, border = 'white', borderWidth = 5)
-        drawLabel('+10', 575, app.forwardCounter % 2000, size = 12, bold = True, fill = 'white')
+        drawRect(550, app.forwardCounter % 2000 - 15, 50, 30, fill = None, 
+                 border = 'white', borderWidth = 5)
+        drawLabel('+10', 575, app.forwardCounter % 2000, size = 12, bold = True, 
+                  fill = 'white')
 
 def drawPlayer(app):
     sprite = app.playerSprites[app.playerSpriteCounter]
@@ -704,7 +761,9 @@ def drawPlayer(app):
 def drawPlayerBox(app):
     for i in range(len(app.coordinates)):
         if i < len(app.coordinates) - 1:
-            drawLine(app.coordinates[i][0],app.coordinates[i][1],app.coordinates[i+1][0],app.coordinates[i+1][1], fill = 'white')
+            drawLine(app.coordinates[i][0], app.coordinates[i][1], 
+                     app.coordinates[i+1][0], app.coordinates[i+1][1], 
+                     fill = 'white')
 
 def drawBackground(app):
     for i in range(-1, 2):
