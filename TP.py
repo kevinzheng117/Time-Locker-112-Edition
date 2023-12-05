@@ -629,7 +629,7 @@ def onKeyHold(app, keys):
             app.backgroundImageY += move[1]
             if app.backgroundImageY <= -app.backgroundImageHeight:
                 app.backgroundImageY = 0
-    if ('right' or 'left' or 'up' or 'down' in keys) and app.gameOver == False:
+    if ('right' in keys or 'left' in keys or 'up' in keys or 'down' in keys) and app.gameOver == False:
         if app.stepsPerSecond < 70:
             app.stepsPerSecond += 2
 
@@ -675,7 +675,7 @@ def drawTutorialMenu(app):
 def drawMenu(app):
     drawLabel('Time Locker: 112 Edition', 300, 150, size = 54, fill = 'white', font = 'Impact')
     drawLabel('Press any key to start!', 300, 400, size = 30, fill = 'white', font = 'Impact')
-    drawLabel('Press t for tutorial menu.', 300, 475, size = 30, fill = 'white', font = 'Impact')
+    drawLabel("Press 't' for tutorial menu.", 300, 475, size = 30, fill = 'white', font = 'Impact')
 
 def drawGameOver(app):
     drawLabel(f'HIGH SCORE: {app.highScore}', 300, 200, size = 40, fill = 'white', font = 'Impact')
