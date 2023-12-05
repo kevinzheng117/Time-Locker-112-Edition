@@ -630,6 +630,7 @@ def onKeyHold(app, keys):
             if app.backgroundImageY <= -app.backgroundImageHeight:
                 app.backgroundImageY = 0
     if ('right' in keys or 'left' in keys or 'up' in keys or 'down' in keys) and app.gameOver == False:
+        # 70 should be around the maximum rate of stepsPerSecond (any increase beyond does not increase speed)
         if app.stepsPerSecond < 70:
             app.stepsPerSecond += 2
 
