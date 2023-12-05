@@ -79,6 +79,7 @@ def newGame(app):
     app.nextScoreLine = 300
     app.backgroundImageX = 0
     app.backgroundImageY = 0
+    app.newHighScore = False
 
     ''' 
     source: https://images.fineartamerica.com/images/artworkimages/mediumlarge
@@ -253,6 +254,10 @@ def onStep(app):
         removeObjects(app)
 
         checkShadow(app)
+
+        # keeps track whether or not player achieved new high score in the round
+        if app.score >= app.highScore:
+            app.newHighScore = True
 
 # functions called in onStep start HERE:
 
@@ -737,9 +742,13 @@ def drawMenu(app):
               fill = 'white', font = 'Impact')
 
 def drawGameOver(app):
-    drawLabel(f'HIGH SCORE: {app.highScore}', 300, 200, size = 40, 
-              fill = 'white', font = 'Impact')
-    drawLabel(f'SCORE: {app.score}', 300, 300, size = 60, fill = 'white', 
+    if app.newHighScore:
+        drawLabel(f'NEW HIGH SCORE: {app.highScore}!!!', 300, 300, size = 60, fill = 'white', 
+              font = 'Impact')
+    else:
+        drawLabel(f'HIGH SCORE: {app.highScore}', 300, 200, size = 40, 
+                fill = 'white', font = 'Impact')
+        drawLabel(f'SCORE: {app.score}', 300, 300, size = 60, fill = 'white', 
               font = 'Impact')
     drawLabel('Press any key to go back to menu!', 300, 400, size = 30, 
               fill = 'white', font = 'Impact')
@@ -791,12 +800,12 @@ def redrawAll(app):
             if app.startMenu == True:
                 drawMenu(app)
             else:
-                drawPlayerScore(app)
                 drawEnemy(app)
                 drawProjectile(app)
                 drawObstacle(app)
-                drawShadow(app)
                 drawScoreLine(app)
+                drawShadow(app)
+                drawPlayerScore(app)
     else:
         drawBackground(app)
         drawGameOver(app)
