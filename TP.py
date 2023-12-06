@@ -81,6 +81,7 @@ def newGame(app):
     app.backgroundImageY = 0
     app.newHighScore = False
     app.pause = False
+    app.playerBoxVisible = False
 
     ''' 
     source: https://images.fineartamerica.com/images/artworkimages/mediumlarge
@@ -607,6 +608,8 @@ def onKeyPress(app, key):
             app.forwardCounter += 2000
         elif key == 'p':
             app.pause = not app.pause
+        elif key == 'd':
+            app.playerBoxVisible = not app.playerBoxVisible
 
 
 def onKeyRelease(app, key):
@@ -827,6 +830,8 @@ def redrawAll(app):
                 drawPlayerScore(app)
                 if app.pause == True:
                     drawPauseMenu(app)
+                if app.playerBoxVisible == True:
+                    drawPlayerBox(app)
     else:
         drawBackground(app)
         drawGameOver(app)
