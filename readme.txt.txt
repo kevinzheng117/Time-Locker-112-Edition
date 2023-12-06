@@ -34,6 +34,7 @@ further in the game then they actually have. Therefore, the player does not gain
 points for moving past distances they have already done so.
 'd' - draws player hitbox which shows that it is an irregular polygon, making it
 easier to see its collision with other objects.
+These shortcuts are only available after starting a game.
 Other features can all be easily accessed by simply playing the game.
 
 Fonts: N/A (uses the font Impact which should already be on Windows and Mac)
