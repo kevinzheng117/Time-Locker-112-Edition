@@ -10,21 +10,20 @@ Time Locker is a 2D pixel-art game designed for computer play. The player's obje
 The map contains randomly generated enemies and obstacles. Enemies vary in health, movement patterns, and attack methods. Special enemies can track and shoot at the player. If an enemy or projectile touches the player, they lose.
 
 ## 🕹️ Controls & Mechanics
-```markdown
-# Movement
+### Movement
 - Arrow keys to move.
 
-# Shooting
+### Shooting
 - The character shoots projectiles while moving.
 
-# Time-Warping Mechanic
+### Time-Warping Mechanic
 - Move slowly = Time slows down.
 - Move quickly = Time fast-forwards.
 - Stop moving = Time pauses, but a shadow advances from behind. If caught by the shadow, the player loses.
-```
 
 ## 🚀 How to Run
 ```bash
+# Clone the repository
 # Ensure all files are in the correct folder structure.
 # Run the TP.py file.
 # Do not modify the Images folder as it contains essential assets for the game.
@@ -34,22 +33,16 @@ The map contains randomly generated enemies and obstacles. Enemies vary in healt
 No external libraries are required.
 
 ## ⚙️ Shortcut Commands
-```markdown
-# 'f'
+### 'f'
 - Increases enemy and obstacle generation rate.
 - Unlocks harder enemies.
 
-# 'd'
+### 'd'
 - Displays the player's hitbox for better visualization of collisions.
-```
 
 *Note*: Shortcuts are available only after starting a game.
 
 ## 🎨 Fonts
-```markdown
-# Fonts Used
-- Uses the Impact font, which is pre-installed on both Windows and Mac systems.
-```
+- Uses the **Impact** font, which is pre-installed on both Windows and Mac systems.
 
 Thank you for exploring **Time Locker: 112 Edition**! Enjoy the game and aim for the highest score!
-
