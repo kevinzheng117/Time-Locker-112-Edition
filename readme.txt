@@ -1,40 +1,55 @@
-Project Name: "Time Locker: 112 Edition"
+# Time Locker: 112 Edition
 
-Project Summary: The project is a top-down shooter on an endless map with an 
-interesting time-warping mechanic. The game utilizes a 2D pixel art style. The 
-experience is designed to be enjoyed on a computer. The aim of the player is to 
-gain the highest score. The player can gain points by moving forward and killing 
-enemies. On the game map, there are randomly generated enemies and obstacles. 
-There are be a variety of enemies with different of health, move patterns, and 
-methods of attack, including special enemies that track the player and follow 
-them as well as shoot at them. If these enemies or their projectiles touch the 
-player, the player loses. The player controls their character’s movements using 
-the arrow keys. The character only shoots projectiles when it is moving. 
-The player can utilize the time-warping mechanic by holding the keys. 
-Time slows if the user moves slowly (by tapping the key or holding it for a 
-short time), and time will fast forward if the user moves quickly 
-(by holding it for a longer period of time). The speed of the flow of time will 
-dictate how fast the enemies and projectiles move. If the player is not moving, 
-time pauses and everything freezes. However, there is a shadow that starts 
-behind the user and moves forward. If the player is caught by this shadow, 
-they lose, giving them the incentive to keep moving.
+Welcome to **Time Locker: 112 Edition**, a top-down shooter game with a unique time-warping mechanic. This project was built as part of the 112 coursework and features an endless map, dynamic enemies, and engaging gameplay mechanics designed to test both strategy and reflexes.
 
-How to run: Simply run the TP.py file (the only python file in folder). Note,
-the file accesses images in the Images folder which is in the same folder, so the
-user should not modify that folder in any way.
+## 🎮 Project Summary
+Time Locker is a 2D pixel-art game designed for computer play. The player's objective is to achieve the highest score by:
+- Moving forward
+- Defeating enemies
 
-Libraries: N/A
+The map contains randomly generated enemies and obstacles. Enemies vary in health, movement patterns, and attack methods. Special enemies can track and shoot at the player. If an enemy or projectile touches the player, they lose.
 
-Shortcut commands: 
-'f' - increase rate enemy and obstacle generation as well as
-unlock harder enemies that have not been unlocked (in the case the game is too 
-hard and the user never reaches the harder enemies). Note that this command
-breaks the scoreLine system since the game assumes the player has progressed 
-further in the game then they actually have. Therefore, the player does not gain
-points for moving past distances they have already done so.
-'d' - draws player hitbox which shows that it is an irregular polygon, making it
-easier to see its collision with other objects.
-These shortcuts are only available after starting a game.
-Other features can all be easily accessed by simply playing the game.
+## 🕹️ Controls & Mechanics
+```markdown
+# Movement
+- Arrow keys to move.
 
-Fonts: N/A (uses the font Impact which should already be on Windows and Mac)
+# Shooting
+- The character shoots projectiles while moving.
+
+# Time-Warping Mechanic
+- Move slowly = Time slows down.
+- Move quickly = Time fast-forwards.
+- Stop moving = Time pauses, but a shadow advances from behind. If caught by the shadow, the player loses.
+```
+
+## 🚀 How to Run
+```bash
+# Ensure all files are in the correct folder structure.
+# Run the TP.py file.
+# Do not modify the Images folder as it contains essential assets for the game.
+```
+
+## 📚 Libraries
+No external libraries are required.
+
+## ⚙️ Shortcut Commands
+```markdown
+# 'f'
+- Increases enemy and obstacle generation rate.
+- Unlocks harder enemies.
+
+# 'd'
+- Displays the player's hitbox for better visualization of collisions.
+```
+
+*Note*: Shortcuts are available only after starting a game.
+
+## 🎨 Fonts
+```markdown
+# Fonts Used
+- Uses the Impact font, which is pre-installed on both Windows and Mac systems.
+```
+
+Thank you for exploring **Time Locker: 112 Edition**! Enjoy the game and aim for the highest score!
+
